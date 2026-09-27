@@ -45,34 +45,49 @@ export async function POST(
   const { playerCount } = parsed.data;
   const teamCount = playerCount / 2;
   const groupCount = teamCount / 4;
+  const groupLabels = Array.from({ length: groupCount }, (_, g) =>
+    indexToLetters(g)
+  );
 
-  const groups = await prisma.$transaction(async (tx) => {
-    await tx.tournament.update({
-      where: { id },
-      data: { playerCount },
-    });
+  try {
+    await prisma.$transaction(
+      async (tx) => {
+        await tx.tournament.update({
+          where: { id },
+          data: { playerCount },
+        });
 
-    const createdGroups = [];
-    for (let g = 0; g < groupCount; g++) {
-      const groupLabel = indexToLetters(g);
-      const group = await tx.group.create({
-        data: { label: groupLabel, tournamentId: id },
-      });
-      const teams = await Promise.all(
-        Array.from({ length: 4 }, (_, t) =>
-          tx.team.create({
-            data: {
-              label: `${groupLabel}${t + 1}`,
+        // Groups are created sequentially (each needs its own id before we
+        // can attach teams to it) but teams are batch-inserted in a single
+        // query instead of one create() per team — with larger tournaments
+        // (e.g. 64+ players / 8+ groups) doing 30+ individual inserts inside
+        // one interactive transaction was slow enough to hit the timeout.
+        const groups = [];
+        for (const label of groupLabels) {
+          groups.push(
+            await tx.group.create({ data: { label, tournamentId: id } })
+          );
+        }
+
+        await tx.team.createMany({
+          data: groups.flatMap((group) =>
+            Array.from({ length: 4 }, (_, t) => ({
+              label: `${group.label}${t + 1}`,
               groupId: group.id,
               tournamentId: id,
-            },
-          })
-        )
-      );
-      createdGroups.push({ ...group, teams });
-    }
-    return createdGroups;
-  });
+            }))
+          ),
+        });
+      },
+      { timeout: 15000 }
+    );
+  } catch (err) {
+    console.error("setup-groups failed", err);
+    return NextResponse.json(
+      { error: "Failed to create groups. Please try again." },
+      { status: 500 }
+    );
+  }
 
-  return NextResponse.json({ groups }, { status: 201 });
+  return NextResponse.json({ ok: true }, { status: 201 });
 }
