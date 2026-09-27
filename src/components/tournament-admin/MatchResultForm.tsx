@@ -103,7 +103,8 @@ export function MatchResultForm({
           min={0}
           value={scoreA}
           onChange={(e) => setScoreA(Number(e.target.value))}
-          className="text-center"
+          onFocus={(e) => e.target.select()}
+          className="text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           aria-label={`${match.teamA.label} score`}
         />
         <Input
@@ -111,7 +112,8 @@ export function MatchResultForm({
           min={0}
           value={scoreB}
           onChange={(e) => setScoreB(Number(e.target.value))}
-          className="text-center"
+          onFocus={(e) => e.target.select()}
+          className="text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           aria-label={`${match.teamB.label} score`}
         />
       </div>
