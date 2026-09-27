@@ -55,9 +55,6 @@ export function GroupStandingsView({
               ))}
             </tbody>
           </table>
-          <p className="mt-2 text-xs text-navy-400">
-            Top 2 advance to the elimination round
-          </p>
         </div>
       ))}
     </div>
