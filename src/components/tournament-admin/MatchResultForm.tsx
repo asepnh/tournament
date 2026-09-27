@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import type { AdminMatch } from "./types";
@@ -98,46 +98,56 @@ export function MatchResultForm({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="grid w-fit grid-cols-[3rem_4.5rem_4.5rem_1.5rem] items-center gap-x-2 gap-y-1">
+        <span />
+        <span className="truncate text-center text-xs font-semibold text-navy-700">
+          {match.teamA.label}
+        </span>
+        <span className="truncate text-center text-xs font-semibold text-navy-700">
+          {match.teamB.label}
+        </span>
+        <span />
         {sets.map((set, i) => (
-          <div key={i} className="flex items-center gap-1">
+          <Fragment key={i}>
+            <span className="text-xs text-navy-400">Set {i + 1}</span>
             <Input
               type="number"
               min={0}
               value={set[0]}
               onChange={(e) => updateSet(i, 0, e.target.value)}
-              className="w-14 text-center"
+              className="text-center"
               aria-label={`${match.teamA.label} set ${i + 1} score`}
             />
-            <span className="text-navy-400">–</span>
             <Input
               type="number"
               min={0}
               value={set[1]}
               onChange={(e) => updateSet(i, 1, e.target.value)}
-              className="w-14 text-center"
+              className="text-center"
               aria-label={`${match.teamB.label} set ${i + 1} score`}
             />
-            {sets.length > 1 && (
+            {sets.length > 1 ? (
               <button
                 type="button"
                 onClick={() => removeSet(i)}
-                className="ml-1 text-navy-400 hover:text-red-600"
+                className="text-navy-400 hover:text-red-600"
                 aria-label={`Remove set ${i + 1}`}
               >
                 ×
               </button>
+            ) : (
+              <span />
             )}
-          </div>
+          </Fragment>
         ))}
-        <button
-          type="button"
-          onClick={addSet}
-          className="text-sm font-semibold text-navy-700 hover:underline"
-        >
-          + set
-        </button>
       </div>
+      <button
+        type="button"
+        onClick={addSet}
+        className="self-start text-sm font-semibold text-navy-700 hover:underline"
+      >
+        + set
+      </button>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
