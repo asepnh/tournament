@@ -56,8 +56,10 @@ group standings — no sign-in required.
   matches are distributed across courts, and a "round" is one wave of
   matches — a court's next match only becomes the next round once every
   court has a match in the current round.
-- The admin enters full set scores per match; winners and group standings
-  (points, wins/losses, point differential) are computed automatically.
+- The admin enters a single game score per match (e.g. 11-7); winners and
+  group standings (points, wins/losses, point differential) are computed
+  automatically. Best-of-N / multi-set scoring is planned for Phase 4, when
+  the admin can configure the match format.
 - The public page has two tabs — **Match Results** (with a sub-tab per
   round) and **Group Standings** — both auto-refreshing every few seconds.
 

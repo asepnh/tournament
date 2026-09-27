@@ -39,7 +39,7 @@ export async function PATCH(
 
   if (aSets === bSets) {
     return NextResponse.json(
-      { error: "Match cannot end in a tie — add a deciding set or correct the scores" },
+      { error: "The game cannot end in a tie — correct the scores" },
       { status: 400 }
     );
   }

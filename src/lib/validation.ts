@@ -27,15 +27,14 @@ export const setupGroupsSchema = z.object({
 
 const setScoreSchema = z.number().int().min(0).max(99);
 
+// Phase 1 is single-game matches only (one score per side). Phase 4 will let
+// the admin configure a best-of-N format and this will allow more sets.
 export const enterResultSchema = z
   .object({
-    teamAScores: z.array(setScoreSchema).min(1).max(5),
-    teamBScores: z.array(setScoreSchema).min(1).max(5),
-  })
-  .refine((data) => data.teamAScores.length === data.teamBScores.length, {
-    message: "Both teams must have the same number of sets entered",
+    teamAScores: z.array(setScoreSchema).length(1),
+    teamBScores: z.array(setScoreSchema).length(1),
   })
   .refine(
     (data) => data.teamAScores.every((score, i) => score !== data.teamBScores[i]),
-    { message: "A set cannot end in a tie" }
+    { message: "The game cannot end in a tie" }
   );
