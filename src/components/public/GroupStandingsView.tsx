@@ -14,7 +14,7 @@ export function GroupStandingsView({
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {groups.map((g) => (
         <div
           key={g.groupLabel}
@@ -24,11 +24,11 @@ export function GroupStandingsView({
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="text-navy-500">
-                <th className="pb-1 font-normal">Team</th>
-                <th className="pb-1 font-normal">P</th>
-                <th className="pb-1 font-normal">W-L</th>
-                <th className="pb-1 font-normal">Pts</th>
-                <th className="pb-1 font-normal">Diff</th>
+                <th className="py-1 pr-3 font-normal">Team</th>
+                <th className="px-3 py-1 text-right font-normal">P</th>
+                <th className="px-3 py-1 text-right font-normal">W-L</th>
+                <th className="px-3 py-1 text-right font-normal">Pts</th>
+                <th className="pl-3 py-1 text-right font-normal">Diff</th>
               </tr>
             </thead>
             <tbody>
@@ -41,13 +41,13 @@ export function GroupStandingsView({
                       : "text-navy-500"
                   }
                 >
-                  <td className="py-0.5">{s.teamLabel}</td>
-                  <td className="py-0.5">{s.played}</td>
-                  <td className="py-0.5">
+                  <td className="py-1 pr-3">{s.teamLabel}</td>
+                  <td className="px-3 py-1 text-right">{s.played}</td>
+                  <td className="px-3 py-1 text-right">
                     {s.wins}-{s.losses}
                   </td>
-                  <td className="py-0.5">{s.points}</td>
-                  <td className="py-0.5">
+                  <td className="px-3 py-1 text-right">{s.points}</td>
+                  <td className="pl-3 py-1 text-right">
                     {s.differential > 0 ? "+" : ""}
                     {s.differential}
                   </td>

@@ -32,7 +32,7 @@ export function PublicTournamentView({
   const current = data ?? initial;
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-3xl flex-col px-4 py-6">
+    <main className="mx-auto flex min-h-svh max-w-5xl flex-col px-4 py-6">
       <header className="mb-6">
         <div className="mb-1 flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-bold text-navy-900 sm:text-2xl">
