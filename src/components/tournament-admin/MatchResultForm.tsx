@@ -53,13 +53,33 @@ export function MatchResultForm({
     const winnerIsA = match.winnerId === match.teamAId;
     return (
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 text-sm">
-          <span className={winnerIsA ? "font-semibold text-navy-900" : "text-navy-500"}>
-            {match.teamA.label} {match.teamAScores.join("-")}
+        <div className="inline-grid grid-cols-3 items-center justify-items-center gap-x-4 gap-y-0.5">
+          <span
+            className={`font-sans text-xl ${
+              winnerIsA ? "font-bold text-navy-900" : "font-semibold text-navy-500"
+            }`}
+          >
+            {match.teamA.label}
           </span>
-          <span className="text-navy-400">vs</span>
-          <span className={!winnerIsA ? "font-semibold text-navy-900" : "text-navy-500"}>
-            {match.teamBScores.join("-")} {match.teamB.label}
+          <span className="text-sm text-navy-400">vs</span>
+          <span
+            className={`font-mono text-xl ${
+              !winnerIsA ? "font-bold text-navy-900" : "font-semibold text-navy-500"
+            }`}
+          >
+            {match.teamB.label}
+          </span>
+
+          <span
+            className={`text-base ${winnerIsA ? "font-semibold text-navy-900" : "text-navy-500"}`}
+          >
+            {match.teamAScores[0]}
+          </span>
+          <span className="text-sm text-navy-400">:</span>
+          <span
+            className={`text-base ${!winnerIsA ? "font-semibold text-navy-900" : "text-navy-500"}`}
+          >
+            {match.teamBScores[0]}
           </span>
         </div>
         <Button variant="ghost" onClick={() => setEditing(true)}>
