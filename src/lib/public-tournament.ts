@@ -1,13 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { computeGroupStandings } from "@/lib/standings";
-
-const STAGE_ORDER: Record<string, number> = {
-  POOL: 0,
-  ROUND_OF_16: 1,
-  QUARTERFINAL: 2,
-  SEMIFINAL: 3,
-  FINAL: 4,
-};
+import { STAGE_ORDER } from "@/lib/stageLabels";
 
 export type PublicMatch = {
   id: string;
@@ -17,7 +10,7 @@ export type PublicMatch = {
   teamBLabel: string;
   teamAScores: number[];
   teamBScores: number[];
-  winnerId: string | null;
+  winnerLabel: string | null;
   status: string;
 };
 
@@ -85,7 +78,12 @@ export async function getPublicTournamentData(
       teamBLabel: match.teamB.label,
       teamAScores: match.teamAScores,
       teamBScores: match.teamBScores,
-      winnerId: match.winnerId,
+      winnerLabel:
+        match.winnerId === match.teamAId
+          ? match.teamA.label
+          : match.winnerId === match.teamBId
+            ? match.teamB.label
+            : null,
       status: match.status,
     });
   }

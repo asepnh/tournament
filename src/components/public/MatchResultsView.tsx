@@ -35,7 +35,7 @@ export function MatchResultsView({ rounds }: { rounds: PublicRound[] }) {
       <div className="flex flex-col gap-3">
         {current?.matches.map((m) => {
           const decided = m.status === "COMPLETED";
-          const winnerIsA = m.winnerId !== null && decided;
+          const winnerIsA = decided && m.winnerLabel === m.teamALabel;
           return (
             <div
               key={m.id}

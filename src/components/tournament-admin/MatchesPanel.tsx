@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { roundTabLabel, STAGE_ORDER } from "@/lib/stageLabels";
 import { MatchResultForm } from "./MatchResultForm";
 import type { AdminCourt, AdminGroup, AdminMatch } from "./types";
 
@@ -21,15 +22,34 @@ export function MatchesPanel({
 }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [bracketError, setBracketError] = useState<string | null>(null);
+  const [bracketLoading, setBracketLoading] = useState(false);
 
-  const rounds = useMemo(() => {
-    const map = new Map<number, AdminMatch[]>();
+  const stageRounds = useMemo(() => {
+    const map = new Map<string, { stage: string; round: number; matches: AdminMatch[] }>();
     for (const m of matches) {
-      if (!map.has(m.round)) map.set(m.round, []);
-      map.get(m.round)!.push(m);
+      const key = `${m.stage}-${m.round}`;
+      if (!map.has(key)) map.set(key, { stage: m.stage, round: m.round, matches: [] });
+      map.get(key)!.matches.push(m);
     }
-    return Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
+    return Array.from(map.values()).sort((a, b) => {
+      const stageDiff = STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage];
+      if (stageDiff !== 0) return stageDiff;
+      return a.round - b.round;
+    });
   }, [matches]);
+
+  const poolMatches = useMemo(
+    () => matches.filter((m) => m.stage === "POOL"),
+    [matches]
+  );
+  const bracketMatches = useMemo(
+    () => matches.filter((m) => m.stage !== "POOL"),
+    [matches]
+  );
+  const poolComplete =
+    poolMatches.length > 0 && poolMatches.every((m) => m.status === "COMPLETED");
+  const canGenerateBracket = poolComplete && bracketMatches.length === 0;
 
   async function handleGenerate() {
     setError(null);
@@ -49,6 +69,27 @@ export function MatchesPanel({
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGenerateBracket() {
+    setBracketError(null);
+    setBracketLoading(true);
+    try {
+      const res = await fetch(
+        `/api/tournaments/${tournamentId}/generate-bracket`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setBracketError(data.error ?? "Something went wrong");
+        return;
+      }
+      onChange();
+    } catch {
+      setBracketError("Something went wrong. Please try again.");
+    } finally {
+      setBracketLoading(false);
     }
   }
 
@@ -74,10 +115,10 @@ export function MatchesPanel({
     <Card>
       <h2 className="mb-4 text-lg font-semibold text-navy-900">Matches</h2>
       <div className="flex flex-col gap-6">
-        {rounds.map(([round, roundMatches]) => (
-          <div key={round}>
+        {stageRounds.map(({ stage, round, matches: roundMatches }) => (
+          <div key={`${stage}-${round}`}>
             <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-navy-500">
-              Round {round}
+              {roundTabLabel(stage, round)}
             </h3>
             <div className="flex flex-col gap-3">
               {roundMatches.map((m) => (
@@ -109,6 +150,21 @@ export function MatchesPanel({
           </div>
         ))}
       </div>
+
+      {canGenerateBracket && (
+        <div className="mt-6 border-t border-navy-200 pt-4">
+          <p className="mb-3 text-sm text-navy-600">
+            Pool play is complete. Generate the elimination bracket from the
+            top 2 teams in each group.
+          </p>
+          <Button onClick={handleGenerateBracket} disabled={bracketLoading}>
+            {bracketLoading ? "Generating..." : "Generate elimination bracket"}
+          </Button>
+          {bracketError && (
+            <p className="mt-2 text-sm text-red-600">{bracketError}</p>
+          )}
+        </div>
+      )}
     </Card>
   );
 }

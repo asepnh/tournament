@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getOwnedTournament } from "@/lib/authz";
 import { enterResultSchema } from "@/lib/validation";
+import { advanceBracketIfStageComplete } from "@/lib/bracket-progress";
 
 export async function PATCH(
   request: Request,
@@ -46,14 +47,18 @@ export async function PATCH(
 
   const winnerId = aSets > bSets ? match.teamAId : match.teamBId;
 
-  const updated = await prisma.match.update({
-    where: { id: matchId },
-    data: {
-      teamAScores,
-      teamBScores,
-      winnerId,
-      status: "COMPLETED",
-    },
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.match.update({
+      where: { id: matchId },
+      data: {
+        teamAScores,
+        teamBScores,
+        winnerId,
+        status: "COMPLETED",
+      },
+    });
+    await advanceBracketIfStageComplete(tx, id, result.stage);
+    return result;
   });
 
   return NextResponse.json({ match: updated });

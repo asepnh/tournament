@@ -2,8 +2,9 @@
 
 import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { Label, Select } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { PLAYER_COUNT_OPTIONS } from "@/lib/validation";
 import type { AdminGroup } from "./types";
 
 export function PlayerSetupPanel({
@@ -15,7 +16,7 @@ export function PlayerSetupPanel({
   groups: AdminGroup[];
   onChange: () => void;
 }) {
-  const [playerCount, setPlayerCount] = useState("");
+  const [playerCount, setPlayerCount] = useState(String(PLAYER_COUNT_OPTIONS[0]));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -73,23 +74,28 @@ export function PlayerSetupPanel({
         Set up groups
       </h2>
       <p className="mb-4 text-sm text-navy-600">
-        Doubles pool play with 4 teams per group. Enter the total number of
-        players (must be a multiple of 8) and groups/teams will be created
-        automatically, labeled A1–A4, B1–B4, and so on.
+        Doubles pool play with 4 teams per group. Choose the total number of
+        players and groups/teams will be created automatically, labeled
+        A1–A4, B1–B4, and so on. (16 players = 2 groups, 32 = 4 groups,
+        64 = 8 groups — kept to powers of 2 so the elimination bracket
+        works cleanly later.)
       </p>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <div>
           <Label htmlFor="playerCount">Total players</Label>
-          <Input
+          <Select
             id="playerCount"
-            type="number"
-            min={8}
-            step={8}
             required
             value={playerCount}
             onChange={(e) => setPlayerCount(e.target.value)}
-            className="w-32"
-          />
+            className="w-36"
+          >
+            {PLAYER_COUNT_OPTIONS.map((n) => (
+              <option key={n} value={n}>
+                {n} players
+              </option>
+            ))}
+          </Select>
         </div>
         <Button type="submit" disabled={loading}>
           {loading ? "Creating groups..." : "Create groups"}

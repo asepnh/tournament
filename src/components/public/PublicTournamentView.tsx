@@ -31,6 +31,10 @@ export function PublicTournamentView({
   const [tab, setTab] = useState<"results" | "standings">("results");
   const current = data ?? initial;
 
+  const champion = current.rounds
+    .find((r) => r.stage === "FINAL")
+    ?.matches.find((m) => m.winnerLabel)?.winnerLabel;
+
   return (
     <main className="mx-auto flex min-h-svh max-w-5xl flex-col px-4 py-6">
       <header className="mb-6">
@@ -45,6 +49,11 @@ export function PublicTournamentView({
         {current.tournament.description && (
           <p className="text-sm text-navy-600">
             {current.tournament.description}
+          </p>
+        )}
+        {champion && (
+          <p className="mt-2 text-sm font-semibold text-navy-700">
+            Champion: {champion}
           </p>
         )}
       </header>

@@ -40,6 +40,14 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
   }
 
   const matchesGenerated = data.matches.length > 0;
+  const finalMatch = data.matches.find(
+    (m) => m.stage === "FINAL" && m.status === "COMPLETED"
+  );
+  const champion = finalMatch
+    ? finalMatch.winnerId === finalMatch.teamAId
+      ? finalMatch.teamA.label
+      : finalMatch.teamB.label
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -51,6 +59,11 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
           {data.tournament.description && (
             <p className="mt-1 max-w-2xl text-sm text-navy-600">
               {data.tournament.description}
+            </p>
+          )}
+          {champion && (
+            <p className="mt-2 text-sm font-semibold text-navy-700">
+              Champion: {champion}
             </p>
           )}
         </div>

@@ -40,21 +40,21 @@ model User {
 }
 
 model Tournament {
-  id          String            @id @default(cuid())
-  slug        String            @unique
+  id          String           @id @default(cuid())
+  slug        String           @unique
   name        String
   description String?
-  status      TournamentStatus  @default(SETUP)
-  format      TournamentFormat  @default(POOL_PLAY)
+  status      TournamentStatus @default(SETUP)
+  format      TournamentFormat @default(POOL_PLAY)
   playerCount Int?
   ownerId     String
-  owner       User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner       User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   courts      Court[]
   groups      Group[]
   teams       Team[]
   matches     Match[]
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }
 
 model Court {
@@ -94,24 +94,25 @@ model Team {
 }
 
 model Match {
-  id           String      @id @default(cuid())
-  tournamentId String
-  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  groupId      String?
-  group        Group?      @relation(fields: [groupId], references: [id], onDelete: SetNull)
-  stage        MatchStage  @default(POOL)
-  round        Int
-  courtId      String
-  court        Court       @relation(fields: [courtId], references: [id], onDelete: Cascade)
-  teamAId      String
-  teamA        Team        @relation("TeamA", fields: [teamAId], references: [id], onDelete: Cascade)
-  teamBId      String
-  teamB        Team        @relation("TeamB", fields: [teamBId], references: [id], onDelete: Cascade)
-  teamAScores  Int[]       @default([])
-  teamBScores  Int[]       @default([])
-  winnerId     String?
-  winner       Team?       @relation("Winner", fields: [winnerId], references: [id], onDelete: SetNull)
-  status       MatchStatus @default(SCHEDULED)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id              String      @id @default(cuid())
+  tournamentId    String
+  tournament      Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  groupId         String?
+  group           Group?      @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  stage           MatchStage  @default(POOL)
+  round           Int
+  bracketPosition Int?
+  courtId         String
+  court           Court       @relation(fields: [courtId], references: [id], onDelete: Cascade)
+  teamAId         String
+  teamA           Team        @relation("TeamA", fields: [teamAId], references: [id], onDelete: Cascade)
+  teamBId         String
+  teamB           Team        @relation("TeamB", fields: [teamBId], references: [id], onDelete: Cascade)
+  teamAScores     Int[]       @default([])
+  teamBScores     Int[]       @default([])
+  winnerId        String?
+  winner          Team?       @relation("Winner", fields: [winnerId], references: [id], onDelete: SetNull)
+  status          MatchStatus @default(SCHEDULED)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
