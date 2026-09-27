@@ -7,7 +7,7 @@ export function GroupStandingsView({
 }) {
   if (groups.length === 0) {
     return (
-      <p className="text-sm text-navy-300">
+      <p className="text-sm text-navy-600">
         Groups haven&apos;t been set up yet — check back soon.
       </p>
     );
@@ -18,12 +18,12 @@ export function GroupStandingsView({
       {groups.map((g) => (
         <div
           key={g.groupLabel}
-          className="rounded-lg border border-navy-700 bg-navy-900/40 p-4"
+          className="rounded-lg border border-navy-200 bg-white p-4"
         >
-          <p className="mb-3 font-semibold text-navy-50">Group {g.groupLabel}</p>
+          <p className="mb-3 font-semibold text-navy-900">Group {g.groupLabel}</p>
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="text-navy-400">
+              <tr className="text-navy-500">
                 <th className="pb-1 font-normal">Team</th>
                 <th className="pb-1 font-normal">P</th>
                 <th className="pb-1 font-normal">W-L</th>
@@ -37,8 +37,8 @@ export function GroupStandingsView({
                   key={s.teamLabel}
                   className={
                     i < 2
-                      ? "font-medium text-accent-400"
-                      : "text-navy-200"
+                      ? "font-semibold text-navy-900"
+                      : "text-navy-500"
                   }
                 >
                   <td className="py-0.5">{s.teamLabel}</td>
@@ -55,7 +55,7 @@ export function GroupStandingsView({
               ))}
             </tbody>
           </table>
-          <p className="mt-2 text-xs text-navy-500">
+          <p className="mt-2 text-xs text-navy-400">
             Top 2 advance to the elimination round
           </p>
         </div>

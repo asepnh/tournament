@@ -45,11 +45,11 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-navy-50">
+          <h1 className="text-2xl font-bold text-navy-900">
             {data.tournament.name}
           </h1>
           {data.tournament.description && (
-            <p className="mt-1 max-w-2xl text-sm text-navy-300">
+            <p className="mt-1 max-w-2xl text-sm text-navy-600">
               {data.tournament.description}
             </p>
           )}

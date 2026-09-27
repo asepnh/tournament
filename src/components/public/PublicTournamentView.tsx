@@ -35,15 +35,15 @@ export function PublicTournamentView({
     <main className="mx-auto flex min-h-svh max-w-3xl flex-col px-4 py-6">
       <header className="mb-6">
         <div className="mb-1 flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-bold text-navy-50 sm:text-2xl">
+          <h1 className="text-xl font-bold text-navy-900 sm:text-2xl">
             {current.tournament.name}
           </h1>
-          <span className="rounded-full bg-navy-800 px-2 py-0.5 text-xs font-semibold text-accent-400">
+          <span className="rounded-full bg-navy-100 px-2 py-0.5 text-xs font-semibold text-navy-700">
             {STATUS_LABEL[current.tournament.status] ?? current.tournament.status}
           </span>
         </div>
         {current.tournament.description && (
-          <p className="text-sm text-navy-300">
+          <p className="text-sm text-navy-600">
             {current.tournament.description}
           </p>
         )}

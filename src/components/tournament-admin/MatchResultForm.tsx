@@ -81,11 +81,11 @@ export function MatchResultForm({
     return (
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 text-sm">
-          <span className={winnerIsA ? "font-semibold text-accent-400" : "text-navy-200"}>
+          <span className={winnerIsA ? "font-semibold text-navy-900" : "text-navy-500"}>
             {match.teamA.label} {match.teamAScores.join("-")}
           </span>
-          <span className="text-navy-500">vs</span>
-          <span className={!winnerIsA ? "font-semibold text-accent-400" : "text-navy-200"}>
+          <span className="text-navy-400">vs</span>
+          <span className={!winnerIsA ? "font-semibold text-navy-900" : "text-navy-500"}>
             {match.teamBScores.join("-")} {match.teamB.label}
           </span>
         </div>
@@ -109,7 +109,7 @@ export function MatchResultForm({
               className="w-14 text-center"
               aria-label={`${match.teamA.label} set ${i + 1} score`}
             />
-            <span className="text-navy-500">–</span>
+            <span className="text-navy-400">–</span>
             <Input
               type="number"
               min={0}
@@ -122,7 +122,7 @@ export function MatchResultForm({
               <button
                 type="button"
                 onClick={() => removeSet(i)}
-                className="ml-1 text-navy-400 hover:text-red-400"
+                className="ml-1 text-navy-400 hover:text-red-600"
                 aria-label={`Remove set ${i + 1}`}
               >
                 ×
@@ -133,13 +133,13 @@ export function MatchResultForm({
         <button
           type="button"
           onClick={addSet}
-          className="text-sm text-accent-400 hover:underline"
+          className="text-sm font-semibold text-navy-700 hover:underline"
         >
           + set
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="flex gap-2">
         <Button onClick={handleSave} disabled={loading}>

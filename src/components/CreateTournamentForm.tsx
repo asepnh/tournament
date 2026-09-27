@@ -42,7 +42,7 @@ export function CreateTournamentForm() {
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-navy-50">
+      <h2 className="mb-4 text-lg font-semibold text-navy-900">
         Create a tournament
       </h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -67,7 +67,7 @@ export function CreateTournamentForm() {
           />
         </div>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
         <Button type="submit" disabled={loading} className="self-start">
           {loading ? "Creating..." : "Create tournament"}

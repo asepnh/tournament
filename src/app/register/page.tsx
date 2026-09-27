@@ -43,10 +43,10 @@ export default function RegisterPage() {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center px-4 py-12">
-      <h1 className="mb-1 text-2xl font-bold text-navy-50">
+      <h1 className="mb-1 text-2xl font-bold text-navy-900">
         Create your admin account
       </h1>
-      <p className="mb-6 text-sm text-navy-300">
+      <p className="mb-6 text-sm text-navy-600">
         Register to create and manage pickleball tournaments.
       </p>
 
@@ -87,7 +87,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
           <Button type="submit" disabled={loading} className="mt-2 w-full">
             {loading ? "Creating account..." : "Create account"}
@@ -95,9 +95,9 @@ export default function RegisterPage() {
         </form>
       </Card>
 
-      <p className="mt-6 text-center text-sm text-navy-300">
+      <p className="mt-6 text-center text-sm text-navy-600">
         Already have an account?{" "}
-        <Link href="/login" className="text-accent-400 hover:underline">
+        <Link href="/login" className="font-semibold text-navy-700 hover:underline">
           Sign in
         </Link>
       </p>

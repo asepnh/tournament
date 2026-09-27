@@ -48,14 +48,14 @@ export function PlayerSetupPanel({
   if (groups.length > 0) {
     return (
       <Card>
-        <h2 className="mb-4 text-lg font-semibold text-navy-50">
+        <h2 className="mb-4 text-lg font-semibold text-navy-900">
           Groups &amp; teams
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((g) => (
-            <div key={g.id} className="rounded-lg border border-navy-700 p-3">
-              <p className="mb-2 font-semibold text-navy-100">Group {g.label}</p>
-              <ul className="space-y-1 text-sm text-navy-300">
+            <div key={g.id} className="rounded-lg border border-navy-200 p-3">
+              <p className="mb-2 font-semibold text-navy-900">Group {g.label}</p>
+              <ul className="space-y-1 text-sm text-navy-600">
                 {g.teams.map((t) => (
                   <li key={t.id}>{t.label}</li>
                 ))}
@@ -69,10 +69,10 @@ export function PlayerSetupPanel({
 
   return (
     <Card>
-      <h2 className="mb-2 text-lg font-semibold text-navy-50">
+      <h2 className="mb-2 text-lg font-semibold text-navy-900">
         Set up groups
       </h2>
-      <p className="mb-4 text-sm text-navy-300">
+      <p className="mb-4 text-sm text-navy-600">
         Doubles pool play with 4 teams per group. Enter the total number of
         players (must be a multiple of 8) and groups/teams will be created
         automatically, labeled A1–A4, B1–B4, and so on.
@@ -95,7 +95,7 @@ export function PlayerSetupPanel({
           {loading ? "Creating groups..." : "Create groups"}
         </Button>
       </form>
-      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </Card>
   );
 }

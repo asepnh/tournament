@@ -18,7 +18,7 @@ export function MatchResultsView({ rounds }: { rounds: PublicRound[] }) {
 
   if (rounds.length === 0) {
     return (
-      <p className="text-sm text-navy-300">
+      <p className="text-sm text-navy-600">
         Matches haven&apos;t been scheduled yet — check back soon.
       </p>
     );
@@ -39,9 +39,9 @@ export function MatchResultsView({ rounds }: { rounds: PublicRound[] }) {
           return (
             <div
               key={m.id}
-              className="rounded-lg border border-navy-700 bg-navy-900/40 p-3"
+              className="rounded-lg border border-navy-200 bg-white p-3"
             >
-              <div className="mb-2 flex items-center justify-between text-xs text-navy-400">
+              <div className="mb-2 flex items-center justify-between text-xs text-navy-500">
                 <span>
                   {m.courtName}
                   {m.groupLabel && <> · Group {m.groupLabel}</>}
@@ -51,12 +51,12 @@ export function MatchResultsView({ rounds }: { rounds: PublicRound[] }) {
               <div className="flex items-center justify-between text-sm">
                 <span
                   className={
-                    winnerIsA ? "font-semibold text-accent-400" : "text-navy-100"
+                    winnerIsA ? "font-semibold text-navy-900" : "text-navy-600"
                   }
                 >
                   {m.teamALabel}
                 </span>
-                <span className="text-navy-300">
+                <span className="text-navy-500">
                   {decided
                     ? m.teamAScores
                         .map((a, i) => `${a}-${m.teamBScores[i]}`)
@@ -66,8 +66,8 @@ export function MatchResultsView({ rounds }: { rounds: PublicRound[] }) {
                 <span
                   className={
                     decided && !winnerIsA
-                      ? "font-semibold text-accent-400"
-                      : "text-navy-100"
+                      ? "font-semibold text-navy-900"
+                      : "text-navy-600"
                   }
                 >
                   {m.teamBLabel}

@@ -18,16 +18,16 @@ export function PublicLinkBanner({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-navy-700 bg-navy-900/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-xl border border-navy-200 bg-navy-50 p-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="text-xs uppercase tracking-wide text-navy-400">
+        <p className="text-xs uppercase tracking-wide text-navy-500">
           Public live results link
         </p>
         <a
           href={path}
           target="_blank"
           rel="noreferrer"
-          className="break-all text-accent-400 hover:underline"
+          className="break-all font-semibold text-navy-700 hover:underline"
         >
           {path}
         </a>

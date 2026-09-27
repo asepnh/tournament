@@ -56,8 +56,8 @@ export function MatchesPanel({
     const canGenerate = groups.length > 0 && courts.length > 0;
     return (
       <Card>
-        <h2 className="mb-2 text-lg font-semibold text-navy-50">Matches</h2>
-        <p className="mb-4 text-sm text-navy-300">
+        <h2 className="mb-2 text-lg font-semibold text-navy-900">Matches</h2>
+        <p className="mb-4 text-sm text-navy-600">
           {canGenerate
             ? "Generate the pool play schedule across your courts."
             : "Add courts and set up groups first, then generate the match schedule."}
@@ -65,27 +65,27 @@ export function MatchesPanel({
         <Button onClick={handleGenerate} disabled={!canGenerate || loading}>
           {loading ? "Generating..." : "Generate matches"}
         </Button>
-        {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </Card>
     );
   }
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-navy-50">Matches</h2>
+      <h2 className="mb-4 text-lg font-semibold text-navy-900">Matches</h2>
       <div className="flex flex-col gap-6">
         {rounds.map(([round, roundMatches]) => (
           <div key={round}>
-            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-navy-400">
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-navy-500">
               Round {round}
             </h3>
             <div className="flex flex-col gap-3">
               {roundMatches.map((m) => (
                 <div
                   key={m.id}
-                  className="rounded-lg border border-navy-700 p-3"
+                  className="rounded-lg border border-navy-200 p-3"
                 >
-                  <div className="mb-2 flex items-center justify-between text-xs text-navy-400">
+                  <div className="mb-2 flex items-center justify-between text-xs text-navy-500">
                     <span>
                       {m.court.name}
                       {m.groupId && (

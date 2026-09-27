@@ -61,21 +61,21 @@ export function CourtsPanel({
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-navy-50">Courts</h2>
+      <h2 className="mb-4 text-lg font-semibold text-navy-900">Courts</h2>
 
       {courts.length > 0 && (
         <ul className="mb-4 flex flex-wrap gap-2">
           {courts.map((c) => (
             <li
               key={c.id}
-              className="flex items-center gap-2 rounded-full bg-navy-800 px-3 py-1 text-sm text-navy-100"
+              className="flex items-center gap-2 rounded-full bg-navy-100 px-3 py-1 text-sm text-navy-700"
             >
               {c.name}
               {!locked && (
                 <button
                   type="button"
                   onClick={() => handleRemove(c.id)}
-                  className="text-navy-400 hover:text-red-400"
+                  className="text-navy-400 hover:text-red-600"
                   aria-label={`Remove ${c.name}`}
                 >
                   ×
@@ -87,7 +87,7 @@ export function CourtsPanel({
       )}
 
       {locked ? (
-        <p className="text-sm text-navy-400">
+        <p className="text-sm text-navy-500">
           Courts are locked once matches have been generated.
         </p>
       ) : (
@@ -103,7 +103,7 @@ export function CourtsPanel({
           </Button>
         </form>
       )}
-      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </Card>
   );
 }

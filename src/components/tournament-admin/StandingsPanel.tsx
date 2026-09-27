@@ -43,16 +43,16 @@ export function StandingsPanel({
 
   return (
     <Card>
-      <h2 className="mb-4 text-lg font-semibold text-navy-50">
+      <h2 className="mb-4 text-lg font-semibold text-navy-900">
         Group standings
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {standingsByGroup.map(({ group, rows }) => (
-          <div key={group.id} className="rounded-lg border border-navy-700 p-3">
-            <p className="mb-2 font-semibold text-navy-100">Group {group.label}</p>
+          <div key={group.id} className="rounded-lg border border-navy-200 p-3">
+            <p className="mb-2 font-semibold text-navy-900">Group {group.label}</p>
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="text-navy-400">
+                <tr className="text-navy-500">
                   <th className="font-normal">Team</th>
                   <th className="font-normal">W-L</th>
                   <th className="font-normal">Pts</th>
@@ -63,7 +63,7 @@ export function StandingsPanel({
                 {rows.map((r, i) => (
                   <tr
                     key={r.teamId}
-                    className={i < 2 ? "text-accent-400" : "text-navy-200"}
+                    className={i < 2 ? "font-semibold text-navy-900" : "text-navy-500"}
                   >
                     <td className="py-0.5">{r.label}</td>
                     <td className="py-0.5">

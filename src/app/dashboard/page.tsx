@@ -27,14 +27,14 @@ export default async function DashboardPage() {
     <div className="min-h-svh">
       <DashboardNav userName={session.user.name} />
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="mb-6 text-2xl font-bold text-navy-50">
+        <h1 className="mb-6 text-2xl font-bold text-navy-900">
           Your tournaments
         </h1>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2">
           {tournaments.length === 0 && (
             <Card className="sm:col-span-2">
-              <p className="text-sm text-navy-300">
+              <p className="text-sm text-navy-600">
                 You haven&apos;t created any tournaments yet. Create your
                 first one below.
               </p>
@@ -44,13 +44,13 @@ export default async function DashboardPage() {
             <Link key={t.id} href={`/dashboard/tournaments/${t.id}`}>
               <Card className="h-full transition-colors hover:border-accent-500">
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <h2 className="font-semibold text-navy-50">{t.name}</h2>
-                  <span className="whitespace-nowrap rounded-full bg-navy-800 px-2 py-0.5 text-xs text-accent-400">
+                  <h2 className="font-semibold text-navy-900">{t.name}</h2>
+                  <span className="whitespace-nowrap rounded-full bg-navy-100 px-2 py-0.5 text-xs font-medium text-navy-700">
                     {STATUS_LABEL[t.status] ?? t.status}
                   </span>
                 </div>
                 {t.description && (
-                  <p className="line-clamp-2 text-sm text-navy-300">
+                  <p className="line-clamp-2 text-sm text-navy-600">
                     {t.description}
                   </p>
                 )}

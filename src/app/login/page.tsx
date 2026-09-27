@@ -47,13 +47,13 @@ function LoginForm() {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center px-4 py-12">
-      <h1 className="mb-1 text-2xl font-bold text-navy-50">Sign in</h1>
-      <p className="mb-6 text-sm text-navy-300">
+      <h1 className="mb-1 text-2xl font-bold text-navy-900">Sign in</h1>
+      <p className="mb-6 text-sm text-navy-600">
         Sign in to manage your tournaments.
       </p>
 
       {registered && (
-        <p className="mb-4 rounded-lg bg-navy-800 px-3 py-2 text-sm text-accent-400">
+        <p className="mb-4 rounded-lg bg-navy-50 px-3 py-2 text-sm font-medium text-navy-700">
           Account created — sign in below.
         </p>
       )}
@@ -83,7 +83,7 @@ function LoginForm() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
           <Button type="submit" disabled={loading} className="mt-2 w-full">
             {loading ? "Signing in..." : "Sign in"}
@@ -91,9 +91,9 @@ function LoginForm() {
         </form>
       </Card>
 
-      <p className="mt-6 text-center text-sm text-navy-300">
+      <p className="mt-6 text-center text-sm text-navy-600">
         Need an account?{" "}
-        <Link href="/register" className="text-accent-400 hover:underline">
+        <Link href="/register" className="font-semibold text-navy-700 hover:underline">
           Register
         </Link>
       </p>
