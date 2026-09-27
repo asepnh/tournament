@@ -1,0 +1,70 @@
+"use client";
+
+import { useState } from "react";
+import useSWR from "swr";
+import { Tabs } from "@/components/ui/Tabs";
+import { MatchResultsView } from "./MatchResultsView";
+import { GroupStandingsView } from "./GroupStandingsView";
+import type { PublicTournamentData } from "@/lib/public-tournament";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+const STATUS_LABEL: Record<string, string> = {
+  SETUP: "Setting up",
+  IN_PROGRESS: "Live",
+  COMPLETED: "Completed",
+};
+
+export function PublicTournamentView({
+  slug,
+  initial,
+}: {
+  slug: string;
+  initial: PublicTournamentData;
+}) {
+  const { data } = useSWR<PublicTournamentData>(
+    `/api/public/tournaments/${slug}`,
+    fetcher,
+    { fallbackData: initial, refreshInterval: 5000 }
+  );
+
+  const [tab, setTab] = useState<"results" | "standings">("results");
+  const current = data ?? initial;
+
+  return (
+    <main className="mx-auto flex min-h-svh max-w-3xl flex-col px-4 py-6">
+      <header className="mb-6">
+        <div className="mb-1 flex flex-wrap items-center gap-2">
+          <h1 className="text-xl font-bold text-navy-50 sm:text-2xl">
+            {current.tournament.name}
+          </h1>
+          <span className="rounded-full bg-navy-800 px-2 py-0.5 text-xs font-semibold text-accent-400">
+            {STATUS_LABEL[current.tournament.status] ?? current.tournament.status}
+          </span>
+        </div>
+        {current.tournament.description && (
+          <p className="text-sm text-navy-300">
+            {current.tournament.description}
+          </p>
+        )}
+      </header>
+
+      <Tabs
+        tabs={[
+          { id: "results", label: "Match Results" },
+          { id: "standings", label: "Group Standings" },
+        ]}
+        active={tab}
+        onChange={(id) => setTab(id as "results" | "standings")}
+      />
+
+      <div className="mt-4">
+        {tab === "results" ? (
+          <MatchResultsView rounds={current.rounds} />
+        ) : (
+          <GroupStandingsView groups={current.groups} />
+        )}
+      </div>
+    </main>
+  );
+}
