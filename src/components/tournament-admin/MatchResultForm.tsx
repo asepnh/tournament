@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import type { AdminMatch } from "./types";
 
+function playerNames(team: {
+  player1Name: string | null;
+  player2Name: string | null;
+}): string | null {
+  const names = [team.player1Name, team.player2Name].filter(
+    (n): n is string => !!n && n.trim().length > 0
+  );
+  return names.length > 0 ? names.join(" & ") : null;
+}
+
 export function MatchResultForm({
   tournamentId,
   match,
@@ -51,23 +61,35 @@ export function MatchResultForm({
 
   if (!editing) {
     const winnerIsA = match.winnerId === match.teamAId;
+    const namesA = playerNames(match.teamA);
+    const namesB = playerNames(match.teamB);
     return (
       <div className="flex items-center justify-between gap-3">
         <div className="inline-grid grid-cols-3 items-center justify-items-center gap-x-4 gap-y-0.5">
-          <span
-            className={`font-sans text-xl ${
-              winnerIsA ? "font-bold text-navy-900" : "font-semibold text-navy-500"
-            }`}
-          >
-            {match.teamA.label}
+          <span className="flex flex-col items-center">
+            <span
+              className={`font-sans text-xl ${
+                winnerIsA ? "font-bold text-navy-900" : "font-semibold text-navy-500"
+              }`}
+            >
+              {match.teamA.label}
+            </span>
+            {namesA && (
+              <span className="text-xs text-navy-400">{namesA}</span>
+            )}
           </span>
           <span className="text-sm text-navy-400">vs</span>
-          <span
-            className={`font-mono text-xl ${
-              !winnerIsA ? "font-bold text-navy-900" : "font-semibold text-navy-500"
-            }`}
-          >
-            {match.teamB.label}
+          <span className="flex flex-col items-center">
+            <span
+              className={`font-mono text-xl ${
+                !winnerIsA ? "font-bold text-navy-900" : "font-semibold text-navy-500"
+              }`}
+            >
+              {match.teamB.label}
+            </span>
+            {namesB && (
+              <span className="text-xs text-navy-400">{namesB}</span>
+            )}
           </span>
 
           <span
@@ -89,14 +111,33 @@ export function MatchResultForm({
     );
   }
 
+  const editNamesA = playerNames(match.teamA);
+  const editNamesB = playerNames(match.teamB);
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid w-fit grid-cols-[4.5rem_4.5rem] items-center gap-x-2 gap-y-1">
-        <span className="truncate text-center text-xs font-semibold text-navy-700">
+      <div className="grid w-fit grid-cols-[6rem_6rem] items-end gap-x-2 gap-y-1">
+        <span
+          className="truncate text-center text-xs font-semibold text-navy-700"
+          title={editNamesA ?? undefined}
+        >
           {match.teamA.label}
+          {editNamesA && (
+            <span className="block truncate font-normal text-navy-400">
+              {editNamesA}
+            </span>
+          )}
         </span>
-        <span className="truncate text-center text-xs font-semibold text-navy-700">
+        <span
+          className="truncate text-center text-xs font-semibold text-navy-700"
+          title={editNamesB ?? undefined}
+        >
           {match.teamB.label}
+          {editNamesB && (
+            <span className="block truncate font-normal text-navy-400">
+              {editNamesB}
+            </span>
+          )}
         </span>
         <Input
           type="number"
