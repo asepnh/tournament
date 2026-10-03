@@ -22,6 +22,7 @@ enum MatchStage {
   ROUND_OF_16
   QUARTERFINAL
   SEMIFINAL
+  THIRD_PLACE
   FINAL
 }
 

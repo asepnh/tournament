@@ -27,7 +27,13 @@ export type AdminGroup = {
 
 export type AdminMatch = {
   id: string;
-  stage: "POOL" | "ROUND_OF_16" | "QUARTERFINAL" | "SEMIFINAL" | "FINAL";
+  stage:
+    | "POOL"
+    | "ROUND_OF_16"
+    | "QUARTERFINAL"
+    | "SEMIFINAL"
+    | "THIRD_PLACE"
+    | "FINAL";
   round: number;
   groupId: string | null;
   courtId: string;

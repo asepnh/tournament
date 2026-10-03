@@ -2,6 +2,7 @@ export type KnockoutStage =
   | "ROUND_OF_16"
   | "QUARTERFINAL"
   | "SEMIFINAL"
+  | "THIRD_PLACE"
   | "FINAL";
 
 /**
@@ -43,6 +44,7 @@ export function nextStage(stage: KnockoutStage): KnockoutStage | null {
       return "SEMIFINAL";
     case "SEMIFINAL":
       return "FINAL";
+    case "THIRD_PLACE":
     case "FINAL":
       return null;
   }

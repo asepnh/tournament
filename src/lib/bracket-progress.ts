@@ -28,9 +28,13 @@ export async function createStageMatches(
 
 /**
  * Call after a knockout match is marked COMPLETED. If every match in that
- * match's stage is now complete, either generates the next stage's matches
- * (pairing consecutive winners in bracket order) or, if the stage was the
- * Final, marks the tournament COMPLETED.
+ * match's stage is now complete:
+ * - Final complete -> tournament marked COMPLETED.
+ * - Third Place complete -> nothing further (doesn't gate completion; the
+ *   Final decides that independently).
+ * - Semifinal complete -> generates both the Final (winners) and the Third
+ *   Place match (losers of each semifinal play each other).
+ * - Any earlier stage complete -> generates the next stage (winners only).
  */
 export async function advanceBracketIfStageComplete(
   tx: Tx,
@@ -45,8 +49,7 @@ export async function advanceBracketIfStageComplete(
   if (stageMatches.length === 0) return;
   if (!stageMatches.every((m) => m.status === "COMPLETED")) return;
 
-  const next = nextStage(stage as KnockoutStage);
-  if (!next) {
+  if (stage === "FINAL") {
     await tx.tournament.update({
       where: { id: tournamentId },
       data: { status: "COMPLETED" },
@@ -54,33 +57,52 @@ export async function advanceBracketIfStageComplete(
     return;
   }
 
-  // Guard against generating the next stage twice if this runs concurrently
-  // for two matches finishing at nearly the same time.
-  const alreadyGenerated = await tx.match.count({
-    where: { tournamentId, stage: next },
-  });
-  if (alreadyGenerated > 0) return;
+  if (stage === "THIRD_PLACE") {
+    return;
+  }
+
+  const next = nextStage(stage as KnockoutStage);
+  if (!next) return;
 
   const ordered = [...stageMatches].sort(
     (a, b) => (a.bracketPosition ?? 0) - (b.bracketPosition ?? 0)
   );
   const winners = ordered.map((m) => m.winnerId as string);
-
-  const pairs: [string, string][] = [];
-  for (let i = 0; i < winners.length; i += 2) {
-    pairs.push([winners[i], winners[i + 1]]);
-  }
+  const losers = ordered.map((m) =>
+    m.winnerId === m.teamAId ? m.teamBId : m.teamAId
+  );
 
   const courts = await tx.court.findMany({
     where: { tournamentId },
     orderBy: { createdAt: "asc" },
   });
+  const courtIds = courts.map((c) => c.id);
 
-  await createStageMatches(
-    tx,
-    tournamentId,
-    next,
-    pairs,
-    courts.map((c) => c.id)
-  );
+  // Guard against generating a stage twice if this runs concurrently for
+  // two matches finishing at nearly the same time.
+  const alreadyGeneratedNext = await tx.match.count({
+    where: { tournamentId, stage: next },
+  });
+  if (alreadyGeneratedNext === 0) {
+    const pairs: [string, string][] = [];
+    for (let i = 0; i < winners.length; i += 2) {
+      pairs.push([winners[i], winners[i + 1]]);
+    }
+    await createStageMatches(tx, tournamentId, next, pairs, courtIds);
+  }
+
+  if (stage === "SEMIFINAL" && losers.length === 2) {
+    const alreadyGeneratedThirdPlace = await tx.match.count({
+      where: { tournamentId, stage: "THIRD_PLACE" },
+    });
+    if (alreadyGeneratedThirdPlace === 0) {
+      await createStageMatches(
+        tx,
+        tournamentId,
+        "THIRD_PLACE",
+        [[losers[0], losers[1]]],
+        courtIds
+      );
+    }
+  }
 }

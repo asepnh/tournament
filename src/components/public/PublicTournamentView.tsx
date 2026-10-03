@@ -31,9 +31,23 @@ export function PublicTournamentView({
   const [tab, setTab] = useState<"results" | "standings">("results");
   const current = data ?? initial;
 
-  const champion = current.rounds
+  const finalMatch = current.rounds
     .find((r) => r.stage === "FINAL")
-    ?.matches.find((m) => m.winnerLabel)?.winnerLabel;
+    ?.matches.find((m) => m.winnerLabel);
+  const champion = finalMatch
+    ? finalMatch.winnerLabel === finalMatch.teamALabel
+      ? finalMatch.teamADisplay
+      : finalMatch.teamBDisplay
+    : null;
+
+  const thirdPlaceMatch = current.rounds
+    .find((r) => r.stage === "THIRD_PLACE")
+    ?.matches.find((m) => m.winnerLabel);
+  const thirdPlace = thirdPlaceMatch
+    ? thirdPlaceMatch.winnerLabel === thirdPlaceMatch.teamALabel
+      ? thirdPlaceMatch.teamADisplay
+      : thirdPlaceMatch.teamBDisplay
+    : null;
 
   return (
     <main className="mx-auto flex min-h-svh max-w-5xl flex-col px-4 py-6">
@@ -55,6 +69,9 @@ export function PublicTournamentView({
           <p className="mt-2 text-sm font-semibold text-navy-700">
             Champion: {champion}
           </p>
+        )}
+        {thirdPlace && (
+          <p className="text-sm text-navy-500">3rd place: {thirdPlace}</p>
         )}
       </header>
 

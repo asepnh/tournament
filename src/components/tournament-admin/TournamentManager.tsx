@@ -10,7 +10,12 @@ import { PlayerNamesPanel } from "./PlayerNamesPanel";
 import { MatchesPanel } from "./MatchesPanel";
 import { StandingsPanel } from "./StandingsPanel";
 import { formatTeamName } from "@/lib/teamDisplay";
-import type { TournamentDetail } from "./types";
+import type { AdminMatch, TournamentDetail } from "./types";
+
+function winnerDisplay(match: AdminMatch): string {
+  const team = match.winnerId === match.teamAId ? match.teamA : match.teamB;
+  return formatTeamName(team.label, team.player1Name, team.player2Name);
+}
 
 export function TournamentManager({ initial }: { initial: TournamentDetail }) {
   const router = useRouter();
@@ -45,19 +50,11 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
   const finalMatch = data.matches.find(
     (m) => m.stage === "FINAL" && m.status === "COMPLETED"
   );
-  const champion = finalMatch
-    ? finalMatch.winnerId === finalMatch.teamAId
-      ? formatTeamName(
-          finalMatch.teamA.label,
-          finalMatch.teamA.player1Name,
-          finalMatch.teamA.player2Name
-        )
-      : formatTeamName(
-          finalMatch.teamB.label,
-          finalMatch.teamB.player1Name,
-          finalMatch.teamB.player2Name
-        )
-    : null;
+  const thirdPlaceMatch = data.matches.find(
+    (m) => m.stage === "THIRD_PLACE" && m.status === "COMPLETED"
+  );
+  const champion = finalMatch ? winnerDisplay(finalMatch) : null;
+  const thirdPlace = thirdPlaceMatch ? winnerDisplay(thirdPlaceMatch) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -75,6 +72,9 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
             <p className="mt-2 text-sm font-semibold text-navy-700">
               Champion: {champion}
             </p>
+          )}
+          {thirdPlace && (
+            <p className="text-sm text-navy-500">3rd place: {thirdPlace}</p>
           )}
         </div>
         <Button variant="danger" onClick={handleDelete} disabled={deleting}>

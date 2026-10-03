@@ -3,6 +3,7 @@ export const STAGE_LABELS: Record<string, string> = {
   ROUND_OF_16: "Round of 16",
   QUARTERFINAL: "Quarterfinal",
   SEMIFINAL: "Semifinal",
+  THIRD_PLACE: "3rd Place",
   FINAL: "Final",
 };
 
@@ -11,7 +12,8 @@ export const STAGE_ORDER: Record<string, number> = {
   ROUND_OF_16: 1,
   QUARTERFINAL: 2,
   SEMIFINAL: 3,
-  FINAL: 4,
+  THIRD_PLACE: 4,
+  FINAL: 5,
 };
 
 export function roundTabLabel(stage: string, round: number): string {

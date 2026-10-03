@@ -80,13 +80,22 @@ group standings — no sign-in required.
 - Once every match in a knockout stage (Semifinal, Quarterfinal, Round of
   16) is complete, the app **automatically** generates the next stage by
   pairing consecutive winners in bracket order (`src/lib/bracket-progress.ts`)
-  — no extra admin action needed between rounds. When the Final completes,
-  the tournament is marked `COMPLETED` and the champion is shown on both
-  the admin and public pages.
+  — no extra admin action needed between rounds. When the Semifinal completes,
+  it generates *both* the Final (winners) and a 3rd Place match (the two
+  semifinal losers play each other). When the Final completes, the
+  tournament is marked `COMPLETED` and the champion (and 3rd place, once
+  that match is also done) is shown on both the admin and public pages.
+  The 3rd Place match doesn't gate tournament completion — only the Final
+  does.
+- Player names: once groups exist, the admin can enter each team's two
+  player names (optional, editable any time). Once set, they show up
+  anywhere a team label appears on the public page and in the admin match
+  views, e.g. "A1 (John & Jane)" — falling back to just the label
+  otherwise.
 
-Player names and configurable formats (singles/doubles, custom group
-sizes, round robin only, choice of scoring format, etc.) are planned for
-later phases; see `prisma/schema.prisma`.
+Configurable formats (singles/doubles, custom group sizes, round robin
+only, choice of scoring format, etc.) are planned for a later phase; see
+`prisma/schema.prisma`.
 
 ## Deploying to Vercel
 
