@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { computeGroupStandings } from "@/lib/standings";
 import { STAGE_ORDER } from "@/lib/stageLabels";
+import { formatTeamName } from "@/lib/teamDisplay";
 
 export type PublicMatch = {
   id: string;
@@ -8,6 +9,8 @@ export type PublicMatch = {
   groupLabel: string | null;
   teamALabel: string;
   teamBLabel: string;
+  teamADisplay: string;
+  teamBDisplay: string;
   teamAScores: number[];
   teamBScores: number[];
   winnerLabel: string | null;
@@ -24,6 +27,7 @@ export type PublicGroupStanding = {
   groupLabel: string;
   standings: {
     teamLabel: string;
+    teamDisplay: string;
     played: number;
     wins: number;
     losses: number;
@@ -76,6 +80,16 @@ export async function getPublicTournamentData(
       groupLabel: match.group?.label ?? null,
       teamALabel: match.teamA.label,
       teamBLabel: match.teamB.label,
+      teamADisplay: formatTeamName(
+        match.teamA.label,
+        match.teamA.player1Name,
+        match.teamA.player2Name
+      ),
+      teamBDisplay: formatTeamName(
+        match.teamB.label,
+        match.teamB.player1Name,
+        match.teamB.player2Name
+      ),
       teamAScores: match.teamAScores,
       teamBScores: match.teamBScores,
       winnerLabel:
@@ -110,20 +124,26 @@ export async function getPublicTournamentData(
         }))
     );
 
-    const teamLabelById = new Map(group.teams.map((t) => [t.id, t.label]));
+    const teamById = new Map(group.teams.map((t) => [t.id, t]));
 
     return {
       groupLabel: group.label,
-      standings: standings.map((s) => ({
-        teamLabel: teamLabelById.get(s.teamId) ?? "?",
-        played: s.played,
-        wins: s.wins,
-        losses: s.losses,
-        points: s.points,
-        pointsFor: s.pointsFor,
-        pointsAgainst: s.pointsAgainst,
-        differential: s.differential,
-      })),
+      standings: standings.map((s) => {
+        const team = teamById.get(s.teamId);
+        return {
+          teamLabel: team?.label ?? "?",
+          teamDisplay: team
+            ? formatTeamName(team.label, team.player1Name, team.player2Name)
+            : "?",
+          played: s.played,
+          wins: s.wins,
+          losses: s.losses,
+          points: s.points,
+          pointsFor: s.pointsFor,
+          pointsAgainst: s.pointsAgainst,
+          differential: s.differential,
+        };
+      }),
     };
   });
 

@@ -48,15 +48,15 @@ export function MatchResultsView({ rounds }: { rounds: PublicRound[] }) {
                 </span>
                 <span>{decided ? "Final" : "Scheduled"}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between gap-2 text-sm">
                 <span
-                  className={
+                  className={`min-w-0 ${
                     winnerIsA ? "font-semibold text-navy-900" : "text-navy-600"
-                  }
+                  }`}
                 >
-                  {m.teamALabel}
+                  {m.teamADisplay}
                 </span>
-                <span className="text-navy-500">
+                <span className="shrink-0 text-navy-500">
                   {decided
                     ? m.teamAScores
                         .map((a, i) => `${a}-${m.teamBScores[i]}`)
@@ -64,13 +64,13 @@ export function MatchResultsView({ rounds }: { rounds: PublicRound[] }) {
                     : "vs"}
                 </span>
                 <span
-                  className={
+                  className={`min-w-0 text-right ${
                     decided && !winnerIsA
                       ? "font-semibold text-navy-900"
                       : "text-navy-600"
-                  }
+                  }`}
                 >
-                  {m.teamBLabel}
+                  {m.teamBDisplay}
                 </span>
               </div>
             </div>

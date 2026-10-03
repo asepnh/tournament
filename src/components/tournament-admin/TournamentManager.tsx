@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { PublicLinkBanner } from "./PublicLinkBanner";
 import { CourtsPanel } from "./CourtsPanel";
 import { PlayerSetupPanel } from "./PlayerSetupPanel";
+import { PlayerNamesPanel } from "./PlayerNamesPanel";
 import { MatchesPanel } from "./MatchesPanel";
 import { StandingsPanel } from "./StandingsPanel";
+import { formatTeamName } from "@/lib/teamDisplay";
 import type { TournamentDetail } from "./types";
 
 export function TournamentManager({ initial }: { initial: TournamentDetail }) {
@@ -45,8 +47,16 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
   );
   const champion = finalMatch
     ? finalMatch.winnerId === finalMatch.teamAId
-      ? finalMatch.teamA.label
-      : finalMatch.teamB.label
+      ? formatTeamName(
+          finalMatch.teamA.label,
+          finalMatch.teamA.player1Name,
+          finalMatch.teamA.player2Name
+        )
+      : formatTeamName(
+          finalMatch.teamB.label,
+          finalMatch.teamB.player1Name,
+          finalMatch.teamB.player2Name
+        )
     : null;
 
   return (
@@ -82,6 +92,12 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
       />
 
       <PlayerSetupPanel
+        tournamentId={data.tournament.id}
+        groups={data.groups}
+        onChange={refresh}
+      />
+
+      <PlayerNamesPanel
         tournamentId={data.tournament.id}
         groups={data.groups}
         onChange={refresh}

@@ -47,25 +47,7 @@ export function PlayerSetupPanel({
   }
 
   if (groups.length > 0) {
-    return (
-      <Card>
-        <h2 className="mb-4 text-lg font-semibold text-navy-900">
-          Groups &amp; teams
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {groups.map((g) => (
-            <div key={g.id} className="rounded-lg border border-navy-200 p-3">
-              <p className="mb-2 font-semibold text-navy-900">Group {g.label}</p>
-              <ul className="space-y-1 text-sm text-navy-600">
-                {g.teams.map((t) => (
-                  <li key={t.id}>{t.label}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </Card>
-    );
+    return null;
   }
 
   return (

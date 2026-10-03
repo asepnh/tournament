@@ -32,11 +32,18 @@ export type PoolFixture = {
 
 /**
  * Given all groups (each with exactly 4 team ids) and a number of courts,
- * builds a global schedule: every group's internal round-1 pairings are
- * queued first, then round-2, then round-3, and the queue is chunked into
- * courts-sized batches. Each batch is one global round; within a round each
- * match gets a distinct court. A court's next match only starts once the
- * current batch (round) is filled, matching "next match on a court = next round".
+ * builds a global schedule, then chunks it into courts-sized batches — each
+ * batch is one global round, and within a round each match gets a distinct
+ * court (a court's next match only starts once the current batch is filled).
+ *
+ * The queue interleaves across groups round-robin style: every group's 1st
+ * match comes before any group's 2nd match, which comes before any group's
+ * 3rd, and so on. This keeps every group's number of *scheduled* matches
+ * equal at any point in the schedule — group A doesn't play out its entire
+ * round robin on the courts before group B's first match even appears.
+ * (Each group's own 6 matches stay in their internal round-robin order —
+ * tier 1's two matches, then tier 2's, then tier 3's — only the order
+ * *across* groups is interleaved.)
  */
 export function buildGlobalSchedule(
   groups: { id: string; teamIds: string[] }[],
@@ -46,18 +53,17 @@ export function buildGlobalSchedule(
     throw new Error("At least one court is required to generate matches");
   }
 
-  const queue: PoolFixture[] = [];
-  const perGroupRounds = groups.map((g) => ({
+  const perGroupMatches = groups.map((g) => ({
     groupId: g.id,
-    rounds: roundRobinPairsForFour(g.teamIds),
+    matches: roundRobinPairsForFour(g.teamIds).flat(),
   }));
 
-  const maxInternalRounds = 3;
-  for (let r = 0; r < maxInternalRounds; r++) {
-    for (const g of perGroupRounds) {
-      for (const [teamAId, teamBId] of g.rounds[r]) {
-        queue.push({ groupId: g.groupId, teamAId, teamBId });
-      }
+  const matchesPerGroup = perGroupMatches[0]?.matches.length ?? 0;
+  const queue: PoolFixture[] = [];
+  for (let i = 0; i < matchesPerGroup; i++) {
+    for (const g of perGroupMatches) {
+      const [teamAId, teamBId] = g.matches[i];
+      queue.push({ groupId: g.groupId, teamAId, teamBId });
     }
   }
 

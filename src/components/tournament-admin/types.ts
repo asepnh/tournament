@@ -15,6 +15,8 @@ export type AdminCourt = {
 export type AdminTeam = {
   id: string;
   label: string;
+  player1Name: string | null;
+  player2Name: string | null;
 };
 
 export type AdminGroup = {
@@ -32,8 +34,8 @@ export type AdminMatch = {
   court: { id: string; name: string };
   teamAId: string;
   teamBId: string;
-  teamA: { id: string; label: string };
-  teamB: { id: string; label: string };
+  teamA: { id: string; label: string; player1Name: string | null; player2Name: string | null };
+  teamB: { id: string; label: string; player1Name: string | null; player2Name: string | null };
   teamAScores: number[];
   teamBScores: number[];
   winnerId: string | null;

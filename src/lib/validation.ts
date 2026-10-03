@@ -25,6 +25,26 @@ export const setupGroupsSchema = z.object({
   }),
 });
 
+const playerNameField = z
+  .string()
+  .trim()
+  .max(60, "Name must be 60 characters or fewer")
+  .optional()
+  .or(z.literal(""))
+  .transform((v) => (v ? v : null));
+
+export const updateTeamNamesSchema = z.object({
+  teams: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        player1Name: playerNameField,
+        player2Name: playerNameField,
+      })
+    )
+    .min(1),
+});
+
 const setScoreSchema = z.number().int().min(0).max(99);
 
 // Phase 1 is single-game matches only (one score per side). Phase 4 will let

@@ -41,7 +41,7 @@ export function GroupStandingsView({
                       : "text-navy-500"
                   }
                 >
-                  <td className="py-1 pr-3">{s.teamLabel}</td>
+                  <td className="py-1 pr-3">{s.teamDisplay}</td>
                   <td className="px-3 py-1 text-right">{s.played}</td>
                   <td className="px-3 py-1 text-right">
                     {s.wins}-{s.losses}
