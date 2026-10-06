@@ -93,6 +93,16 @@ group standings — no sign-in required.
   views, e.g. "A1 (John & Jane)" — falling back to just the label
   otherwise.
 
+### Phase 3 — bulk roster + randomized pairing
+
+- On the Player names panel, the admin can paste the full player roster
+  (one name per line — must exactly match the tournament's player count)
+  and click **Randomize Pairing** to shuffle everyone and assign random
+  pairs across all the existing team slots in one action (saves
+  immediately; click again anytime to fully re-shuffle). The manual
+  per-team name fields still work for touch-ups afterward (fixing a typo,
+  swapping one pair) without re-randomizing everyone.
+
 Configurable formats (singles/doubles, custom group sizes, round robin
 only, choice of scoring format, etc.) are planned for a later phase; see
 `prisma/schema.prisma`.
