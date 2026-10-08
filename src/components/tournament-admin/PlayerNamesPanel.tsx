@@ -4,6 +4,7 @@ import { Fragment, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { randomizePairing } from "@/lib/randomizePairing";
 import type { AdminGroup } from "./types";
 
 type NameState = Record<string, { player1Name: string; player2Name: string }>;
@@ -32,13 +33,11 @@ function buildInitialRosterText(groups: AdminGroup[]): string {
   return names.join("\n");
 }
 
-function shuffle<T>(items: T[]): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
+function parseLines(text: string): string[] {
+  return text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
 }
 
 export function PlayerNamesPanel({
@@ -55,6 +54,7 @@ export function PlayerNamesPanel({
 
   const [names, setNames] = useState<NameState>(() => buildInitialState(groups));
   const [roster, setRoster] = useState<string>(() => buildInitialRosterText(groups));
+  const [seeds, setSeeds] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -63,10 +63,7 @@ export function PlayerNamesPanel({
     return null;
   }
 
-  const rosterCount = roster
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean).length;
+  const rosterCount = parseLines(roster).length;
 
   function updateName(
     teamId: string,
@@ -118,18 +115,16 @@ export function PlayerNamesPanel({
     setError(null);
     setSaved(false);
 
-    const lines = roster
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
+    const rosterLines = parseLines(roster);
+    const seedLines = parseLines(seeds);
 
-    if (lines.length !== expectedCount) {
+    if (rosterLines.length !== expectedCount) {
       setError(
-        `Enter exactly ${expectedCount} names (one per line) — you entered ${lines.length}`
+        `Enter exactly ${expectedCount} names (one per line) — you entered ${rosterLines.length}`
       );
       return;
     }
-    const tooLong = lines.find((l) => l.length > 60);
+    const tooLong = rosterLines.find((l) => l.length > 60);
     if (tooLong) {
       setError("Names must be 60 characters or fewer");
       return;
@@ -137,19 +132,23 @@ export function PlayerNamesPanel({
 
     setLoading(true);
     try {
-      const shuffled = shuffle(lines);
-      const teams = orderedTeams.map((t, i) => ({
-        id: t.id,
-        player1Name: shuffled[i * 2],
-        player2Name: shuffled[i * 2 + 1],
+      const groupSlots = groups.map((g) => ({
+        teamIds: g.teams.map((t) => t.id),
       }));
-      await saveTeams(teams);
+      const assignments = randomizePairing(rosterLines, seedLines, groupSlots);
+      await saveTeams(
+        assignments.map((a) => ({
+          id: a.teamId,
+          player1Name: a.player1Name,
+          player2Name: a.player2Name,
+        }))
+      );
 
       const nextNames: NameState = {};
-      for (const t of teams) {
-        nextNames[t.id] = {
-          player1Name: t.player1Name,
-          player2Name: t.player2Name,
+      for (const a of assignments) {
+        nextNames[a.teamId] = {
+          player1Name: a.player1Name,
+          player2Name: a.player2Name,
         };
       }
       setNames(nextNames);
@@ -186,10 +185,29 @@ export function PlayerNamesPanel({
           onChange={(e) => setRoster(e.target.value)}
           placeholder={`Player 1\nPlayer 2\nPlayer 3\n...`}
         />
-        <div className="mt-2 flex items-center justify-between gap-3">
-          <span className="text-xs text-navy-400">
-            {rosterCount} / {expectedCount} names entered
-          </span>
+        <div className="mt-1 text-xs text-navy-400">
+          {rosterCount} / {expectedCount} names entered
+        </div>
+
+        <div className="mt-3">
+          <p className="mb-1 text-sm font-medium text-navy-700">
+            Seeded players (optional)
+          </p>
+          <p className="mb-2 text-xs text-navy-500">
+            List a few names from the roster above, one per line, in
+            priority order (first = seed 1). Each seed is paired with a
+            random unseeded partner and spread into a different group from
+            the other seeds.
+          </p>
+          <Textarea
+            rows={3}
+            value={seeds}
+            onChange={(e) => setSeeds(e.target.value)}
+            placeholder={`Top player\nSecond-best player\n...`}
+          />
+        </div>
+
+        <div className="mt-3 flex justify-end">
           <Button onClick={handleRandomize} disabled={loading} variant="secondary">
             {loading ? "Randomizing..." : "Randomize Pairing"}
           </Button>

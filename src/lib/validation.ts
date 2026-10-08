@@ -15,14 +15,22 @@ export const addCourtSchema = z.object({
   name: z.string().trim().min(1, "Court name is required").max(60),
 });
 
-// Fixed choices so the resulting group count (2, 4, or 8) is always a power
-// of 2 — the elimination bracket (Phase 2) relies on that to avoid byes.
-export const PLAYER_COUNT_OPTIONS = [16, 32, 64] as const;
+// Groups end up with 3-6 teams each, and the group count is always chosen to
+// be a power of 2 (the elimination bracket relies on that to avoid byes) —
+// see src/lib/groupPlanning.ts. That scheme covers every even player count
+// from MIN to MAX with no gaps; 96 is a real ceiling, not arbitrary: it's the
+// most players 8 groups (the max the bracket's Round-of-16-down-to-Final
+// chain supports) can hold at 6 teams/group.
+export const MIN_PLAYER_COUNT = 8;
+export const MAX_PLAYER_COUNT = 96;
 
 export const setupGroupsSchema = z.object({
-  playerCount: z.union([z.literal(16), z.literal(32), z.literal(64)], {
-    message: "Choose 16, 32, or 64 players",
-  }),
+  playerCount: z
+    .number()
+    .int()
+    .min(MIN_PLAYER_COUNT, `Must be at least ${MIN_PLAYER_COUNT} players`)
+    .max(MAX_PLAYER_COUNT, `Must be at most ${MAX_PLAYER_COUNT} players`)
+    .refine((n) => n % 2 === 0, { message: "Player count must be even" }),
 });
 
 const playerNameField = z

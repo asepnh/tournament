@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getOwnedTournament } from "@/lib/authz";
 import { setupGroupsSchema } from "@/lib/validation";
 import { indexToLetters } from "@/lib/labels";
+import { planGroupSizes } from "@/lib/groupPlanning";
 
 export async function POST(
   request: Request,
@@ -44,10 +45,7 @@ export async function POST(
 
   const { playerCount } = parsed.data;
   const teamCount = playerCount / 2;
-  const groupCount = teamCount / 4;
-  const groupLabels = Array.from({ length: groupCount }, (_, g) =>
-    indexToLetters(g)
-  );
+  const groupSizes = planGroupSizes(teamCount);
 
   try {
     await prisma.$transaction(
@@ -63,15 +61,17 @@ export async function POST(
         // (e.g. 64+ players / 8+ groups) doing 30+ individual inserts inside
         // one interactive transaction was slow enough to hit the timeout.
         const groups = [];
-        for (const label of groupLabels) {
+        for (let g = 0; g < groupSizes.length; g++) {
           groups.push(
-            await tx.group.create({ data: { label, tournamentId: id } })
+            await tx.group.create({
+              data: { label: indexToLetters(g), tournamentId: id },
+            })
           );
         }
 
         await tx.team.createMany({
-          data: groups.flatMap((group) =>
-            Array.from({ length: 4 }, (_, t) => ({
+          data: groups.flatMap((group, g) =>
+            Array.from({ length: groupSizes[g] }, (_, t) => ({
               label: `${group.label}${t + 1}`,
               groupId: group.id,
               tournamentId: id,

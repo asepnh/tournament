@@ -2,9 +2,9 @@
 
 import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
-import { Label, Select } from "@/components/ui/Input";
+import { Input, Label } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { PLAYER_COUNT_OPTIONS } from "@/lib/validation";
+import { MIN_PLAYER_COUNT, MAX_PLAYER_COUNT } from "@/lib/validation";
 import type { AdminGroup } from "./types";
 
 export function PlayerSetupPanel({
@@ -16,7 +16,7 @@ export function PlayerSetupPanel({
   groups: AdminGroup[];
   onChange: () => void;
 }) {
-  const [playerCount, setPlayerCount] = useState(String(PLAYER_COUNT_OPTIONS[0]));
+  const [playerCount, setPlayerCount] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -56,28 +56,27 @@ export function PlayerSetupPanel({
         Set up groups
       </h2>
       <p className="mb-4 text-sm text-navy-600">
-        Doubles pool play with 4 teams per group. Choose the total number of
-        players and groups/teams will be created automatically, labeled
-        A1–A4, B1–B4, and so on. (16 players = 2 groups, 32 = 4 groups,
-        64 = 8 groups — kept to powers of 2 so the elimination bracket
-        works cleanly later.)
+        Doubles pool play. Enter the total number of players — any even
+        number from {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT} — and
+        groups/teams will be created automatically, labeled A1–A4, B1–B6,
+        and so on. Groups end up with 3–6 teams each (the exact split
+        depends on the count, kept to a power-of-2 number of groups so the
+        elimination bracket works cleanly later).
       </p>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <div>
           <Label htmlFor="playerCount">Total players</Label>
-          <Select
+          <Input
             id="playerCount"
+            type="number"
+            min={MIN_PLAYER_COUNT}
+            max={MAX_PLAYER_COUNT}
+            step={2}
             required
             value={playerCount}
             onChange={(e) => setPlayerCount(e.target.value)}
-            className="w-36"
-          >
-            {PLAYER_COUNT_OPTIONS.map((n) => (
-              <option key={n} value={n}>
-                {n} players
-              </option>
-            ))}
-          </Select>
+            className="w-28"
+          />
         </div>
         <Button type="submit" disabled={loading}>
           {loading ? "Creating groups..." : "Create groups"}

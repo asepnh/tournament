@@ -53,9 +53,9 @@ export async function POST(
       { status: 400 }
     );
   }
-  if (groups.some((g) => g.teams.length !== 4)) {
+  if (groups.some((g) => g.teams.length < 3 || g.teams.length > 6)) {
     return NextResponse.json(
-      { error: "Every group must have exactly 4 teams" },
+      { error: "Every group must have between 3 and 6 teams" },
       { status: 400 }
     );
   }

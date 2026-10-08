@@ -51,11 +51,12 @@ group standings — no sign-in required.
 
 - An admin registers, creates a tournament, and gets a public link
   (`/t/<slug>`) that anyone can view live, with no login.
-- The admin adds courts and chooses the total player count from a dropdown
-  — 16, 32, or 64 (doubles, 4 teams of 2 players per group; kept to these
-  three so the resulting group count, 2/4/8, is always a power of 2 — see
-  Phase 2). The app automatically creates groups and labels every team
-  (A1–A4, B1–B4, …).
+- The admin adds courts and enters the total player count — any even
+  number from 8 to 96 (doubles). The app picks a power-of-2 number of
+  groups (so the bracket in Phase 2 never needs byes) with 3-6 teams per
+  group, and spreads the teams across them as evenly as possible — see
+  `planGroupSizes` in `src/lib/groupPlanning.ts`. The app automatically
+  creates the groups and labels every team (A1–A4, B1–B6, …).
 - The admin generates the match schedule: each group plays full round robin,
   matches are distributed across courts, and a "round" is one wave of
   matches — a court's next match only becomes the next round once every
@@ -75,8 +76,8 @@ group standings — no sign-in required.
   winner against a **different** group's runner-up (see
   `seedFirstRound` in `src/lib/bracket.ts`), so no team can face an
   opponent they already played in pool play, in round 1.
-- Bracket size is always a power of 2 (4/8/16 qualifiers from the
-  16/32/64-player options), so there's never a need for byes.
+- Bracket size is always a power of 2 (since the group count always is —
+  see above), so there's never a need for byes.
 - Once every match in a knockout stage (Semifinal, Quarterfinal, Round of
   16) is complete, the app **automatically** generates the next stage by
   pairing consecutive winners in bracket order (`src/lib/bracket-progress.ts`)
@@ -102,6 +103,13 @@ group standings — no sign-in required.
   immediately; click again anytime to fully re-shuffle). The manual
   per-team name fields still work for touch-ups afterward (fixing a typo,
   swapping one pair) without re-randomizing everyone.
+- Optional seeding: alongside the roster, the admin can list a handful of
+  player names (in priority order) as seeds. Each seed is paired with a
+  random unseeded partner and that team is spread into a different group
+  than the other seeds, cycling through the groups in order (see
+  `randomizePairing` in `src/lib/randomizePairing.ts`). Seeding is
+  ephemeral — it's only used at the moment Randomize Pairing is clicked,
+  not saved anywhere, so re-randomizing later means re-listing the seeds.
 
 Configurable formats (singles/doubles, custom group sizes, round robin
 only, choice of scoring format, etc.) are planned for a later phase; see
