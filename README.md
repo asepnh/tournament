@@ -124,6 +124,12 @@ architecture, decisions, operations runbook and known gotchas.
   ephemeral — it's only used at the moment Allocate Players is clicked,
   not saved anywhere, so re-allocating later means re-listing the seeds.
 
+### Super admin
+
+One or more accounts can be marked super admin (a database flag, set by hand —
+see [HANDOVER.md](HANDOVER.md)). They get a **Users** page listing every admin
+account, with the ability to delete accounts (and their tournaments).
+
 Configurable formats (singles/doubles, custom group sizes, round robin
 only, choice of scoring format, etc.) are planned for a later phase; see
 `prisma/schema.prisma`.

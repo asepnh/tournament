@@ -36,6 +36,9 @@ model User {
   email        String       @unique
   passwordHash String
   name         String?
+  // Can list and delete admin accounts. Set by hand in the database; there
+  // is deliberately no way to grant it from the app.
+  isSuperAdmin Boolean      @default(false)
   createdAt    DateTime     @default(now())
   tournaments  Tournament[]
 }

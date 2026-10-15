@@ -95,7 +95,8 @@ SWR · zod. Exact versions are in `package.json`.
 
 Migrations so far: `init`, `add_bracket_position`, `add_third_place_stage`,
 `add_advancing_teams` (`Tournament.advancingTeams`, nullable: null on older
-tournaments means top 2 per group).
+tournaments means top 2 per group), `add_user_super_admin` (`User.isSuperAdmin`,
+default false).
 The player-count rewrite, player names, allocation and seeding needed **no**
 migrations (`Team.player1Name/player2Name` existed from day one).
 
@@ -189,6 +190,7 @@ All admin routes require a session and check `getOwnedTournament`.
 | `POST .../generate-matches` | Build pool schedule (409 if matches exist) |
 | `PATCH .../matches/[matchId]` | Save score; triggers bracket advancement |
 | `POST .../generate-bracket` | First knockout stage (needs all pool matches done) |
+| `DELETE /api/admin/users/[userId]` | Super admin only (403 otherwise): delete an account and, by cascade, its tournaments. Refuses self and other super admins |
 | `GET /api/public/tournaments/[slug]` | Public payload, no auth, `no-store` |
 
 ## 7. Frontend structure
@@ -252,9 +254,18 @@ All admin routes require a session and check `getOwnedTournament`.
   (Vercel > Storage > database > Open in Neon Console > Connection Details, with
   *Pooled connection* switched off).
 - Code-only changes: just push to `main`.
-- Housekeeping: production holds one leftover test account
-  (`claude-live-test@example.com`, no tournaments). Safe to ignore; there's no
-  in-app way to delete accounts.
+- **Super admin:** `User.isSuperAdmin` unlocks a Users page (`/dashboard/users`,
+  link in the header) that lists every account and can delete them (with their
+  tournaments). It is checked against the database on every request
+  (`src/lib/superAdmin.ts`), not stored in the JWT, so changes apply
+  immediately. There is deliberately no in-app way to grant it. Register the
+  account normally, then in the Neon console's SQL Editor run:
+  ```sql
+  UPDATE "User" SET "isSuperAdmin" = true WHERE email = 'you@example.com';
+  ```
+- Housekeeping: production holds a leftover test account
+  (`claude-live-test@example.com`, no tournaments). A super admin can now
+  delete it from the Users page.
 
 ## 10. Gotchas (read before debugging)
 
