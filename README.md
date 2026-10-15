@@ -107,11 +107,14 @@ architecture, decisions, operations runbook and known gotchas.
   The manual per-team name fields still work for touch-ups afterward
   (fixing a typo, swapping one pair) without re-allocating everyone.
 - Optional seeding: alongside the roster, the admin can list player names
-  in priority order (first = seed 1). With exactly 4 groups, seeds are laid
-  out snake-style across the team rows (seed 1 pairs with seed 8, 2 with 7,
-  ...; the group order rotates each row) so every team row and every group
-  has the same seed strength. With any other group count, each seed gets a
-  random unseeded partner and seeds are spread across groups by cycling.
+  in priority order (first = seed 1). With exactly 4 groups and fewer than 8
+  seeds or an exact multiple of 8, seeds are laid out snake-style across the
+  team rows (seed 1 pairs with seed 8, 2 with 7, ...; the group order rotates
+  each row) so every team row and every group has the same seed strength.
+  With any other seed count (e.g. 11), each seed gets its own team with a
+  random unseeded partner, placed in the same group order. With any other
+  group count, each seed gets a random unseeded partner and seeds are
+  spread across groups by cycling.
   See `randomizePairing` in `src/lib/randomizePairing.ts`. Seeding is
   ephemeral — it's only used at the moment Allocate Players is clicked,
   not saved anywhere, so re-allocating later means re-listing the seeds.

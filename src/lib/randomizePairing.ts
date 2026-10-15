@@ -63,6 +63,48 @@ function placeSeedsByTable(seeds: string[], groups: GroupSlots[]): Placed {
   return placed;
 }
 
+// 4 groups, fewer than 8 seeds: the seeds pair up high-low among
+// themselves (1+5, 2+4 with 5 seeds; an odd one out gets an unseeded
+// partner). Each team goes to the next group in the first row's order, so
+// seeds are spread across the groups.
+function placeFewSeedsByTable(seeds: string[], groups: GroupSlots[]): Placed {
+  const placed: Placed = new Map();
+  const order = FOUR_GROUP_TIER_ORDERS[0].filter(
+    (g) => groups[g].teamIds.length > 0
+  );
+
+  for (let i = 0; i < Math.ceil(seeds.length / 2); i++) {
+    const partner = seeds.length - 1 - i;
+    placed.set(groups[order[i]].teamIds[0], [
+      seeds[i],
+      partner > i ? seeds[partner] : null,
+    ]);
+  }
+
+  return placed;
+}
+
+// 4 groups, any other seed count (9-15, 17-23, ...): every seed gets its
+// own team with a random unseeded partner. Seeds follow the table's group
+// order row by row, which keeps every group's seed strength balanced.
+function placeSoloSeedsByTable(seeds: string[], groups: GroupSlots[]): Placed {
+  const placed: Placed = new Map();
+  const maxRows = Math.max(...groups.map((g) => g.teamIds.length));
+  let next = 0;
+
+  for (let row = 0; row < maxRows && next < seeds.length; row++) {
+    const order = FOUR_GROUP_TIER_ORDERS[row % FOUR_GROUP_TIER_ORDERS.length]
+      .filter((g) => groups[g].teamIds.length > row);
+    for (const groupIndex of order) {
+      if (next >= seeds.length) break;
+      placed.set(groups[groupIndex].teamIds[row], [seeds[next], null]);
+      next += 1;
+    }
+  }
+
+  return placed;
+}
+
 // Any other group count: each seed gets its own team (random unseeded
 // partner), spread by cycling through the groups in order.
 function placeSeedsByCycling(seeds: string[], groups: GroupSlots[]): Placed {
@@ -86,11 +128,13 @@ function placeSeedsByCycling(seeds: string[], groups: GroupSlots[]): Placed {
  * the given team slots (grouped by their existing group).
  *
  * `seedNames` is an optional ordered, priority-first list of players from
- * the roster. With exactly 4 groups the seeds follow the snake table
- * above (seeds pair with seeds); otherwise each seed gets a random
- * unseeded partner and is spread across groups by cycling. A team with
- * only one seed gets a random unseeded partner. Everyone not placed by
- * seeding is shuffled into the remaining slots.
+ * the roster. With exactly 4 groups, seeds partner each other (snake
+ * table above) only when there are fewer than 8 or an exact multiple of 8;
+ * any other count gives every seed its own team and a random unseeded
+ * partner, placed in the table's group order. With other group counts each
+ * seed gets a random unseeded partner and is spread across groups by
+ * cycling. Everyone not placed by seeding is shuffled into the remaining
+ * slots.
  */
 export function randomizePairing(
   rosterNames: string[],
@@ -99,8 +143,12 @@ export function randomizePairing(
 ): TeamAssignment[] {
   const totalTeams = groups.reduce((sum, g) => sum + g.teamIds.length, 0);
   const useTable = groups.length === 4;
+  // With 4 groups, seeds only partner each other when there are fewer than
+  // 8 or an exact multiple of 8; any other count gives each seed its own
+  // team.
+  const pairSeeds = seedNames.length < 8 || seedNames.length % 8 === 0;
 
-  if (!useTable && seedNames.length > totalTeams) {
+  if ((!useTable || !pairSeeds) && seedNames.length > totalTeams) {
     throw new Error(
       `Too many seeds — there are only ${totalTeams} teams to assign them to`
     );
@@ -117,9 +165,16 @@ export function randomizePairing(
     pool.splice(idx, 1);
   }
 
-  const placed = useTable
-    ? placeSeedsByTable(seedNames, groups)
-    : placeSeedsByCycling(seedNames, groups);
+  let placed: Placed;
+  if (!useTable) {
+    placed = placeSeedsByCycling(seedNames, groups);
+  } else if (seedNames.length < 8) {
+    placed = placeFewSeedsByTable(seedNames, groups);
+  } else if (pairSeeds) {
+    placed = placeSeedsByTable(seedNames, groups);
+  } else {
+    placed = placeSoloSeedsByTable(seedNames, groups);
+  }
 
   const unseeded = shuffle(pool);
   for (const pair of placed.values()) {

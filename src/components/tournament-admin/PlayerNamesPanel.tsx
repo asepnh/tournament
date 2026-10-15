@@ -200,7 +200,7 @@ export function PlayerNamesPanel({
             List names from the roster above, one per line, in priority
             order (first = seed 1).{" "}
             {groups.length === 4
-              ? "With 4 groups, seeds are placed snake-style so teams and groups are evenly balanced: seed 1 is paired with seed 8, 2 with 7, 3 with 6, 4 with 5, then 9 with 16, and so on. Players who aren't seeded fill the remaining spots at random."
+              ? "With 4 groups, seeds are placed snake-style so groups are evenly balanced. If you list fewer than 8 seeds or a multiple of 8 (8, 16, 24), seeds are paired with each other: seed 1 with 8, 2 with 7, 3 with 6, 4 with 5, then 9 with 16, and so on. With any other number, each seed is paired with a random unseeded player. Players who aren't seeded fill the remaining spots at random."
               : "Each seed is paired with a random unseeded partner and spread into a different group from the other seeds."}
           </p>
           <Textarea

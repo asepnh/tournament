@@ -147,9 +147,14 @@ list of roster names (first = seed 1). Two layouts, chosen by group count:
   row is hard-coded in `FOUR_GROUP_TIER_ORDERS`: rows 1-3 are the organizer's
   table (A,C,B,D / D,B,C,A / B,D,A,C); row 4 (C,A,D,B) is our own completion of
   the rotation and only matters with >24 seeds; rows 5+ cycle. Seeds fill the
-  table top-down; a team that only gets one seed gets a random unseeded
-  partner; everything not seeded is shuffled into the remaining slots.
-  Groups with fewer teams skip the rows they don't have.
+  table top-down; everything not seeded is shuffled into the remaining slots.
+  Groups with fewer teams skip the rows they don't have. Seeds only partner
+  each other when the seed count is **< 8 or an exact multiple of 8**:
+  multiples of 8 use the snake pairs above; fewer than 8 pair high-low among
+  themselves (5 seeds: 1+5, 2+4, seed 3 gets an unseeded partner), one team per
+  group in row 1's order. Any other count (9-15, 17-23, ...) gives every seed its
+  own team with a random unseeded partner, placed in the table's group order
+  row by row (`placeSoloSeedsByTable`); more seeds than teams throws.
 - **Any other group count:** each seed gets a random *unseeded* partner and is
   placed by cycling through the groups (seed 1 -> A, 2 -> B, ... wrapping).
   Seeds never share a team here.
