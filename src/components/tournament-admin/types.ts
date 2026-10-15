@@ -5,6 +5,7 @@ export type AdminTournament = {
   description: string | null;
   status: "SETUP" | "IN_PROGRESS" | "COMPLETED";
   playerCount: number | null;
+  advancingTeams: number | null;
 };
 
 export type AdminCourt = {

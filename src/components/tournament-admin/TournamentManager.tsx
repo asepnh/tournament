@@ -108,6 +108,7 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
         matches={data.matches}
         groups={data.groups}
         courts={data.courts}
+        advancingTeams={data.tournament.advancingTeams}
         onChange={refresh}
       />
 

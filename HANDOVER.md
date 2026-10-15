@@ -72,7 +72,7 @@ SWR · zod. Exact versions are in `package.json`.
   results reference the slot's id. Player names are just two nullable strings
   *on* the slot, so renaming never breaks anything, but it also rewrites how
   past matches display.
-- **Group:** a pool; top 2 advance. 3-6 teams each.
+- **Group:** a pool; the top k advance (k = `Tournament.advancingTeams` / group count, default 2). 3-6 teams each.
 - **Stage:** `POOL`, `ROUND_OF_16`, `QUARTERFINAL`, `SEMIFINAL`, `THIRD_PLACE`,
   `FINAL`.
 - **Round:** in `POOL`, one "wave" of simultaneous matches (one per court). In
@@ -93,7 +93,9 @@ SWR · zod. Exact versions are in `package.json`.
   `bracketPosition?` (order within a knockout stage; pairs the next stage).
 - Everything cascades from `Tournament`, so deleting a tournament cleans up.
 
-Migrations so far: `init`, `add_bracket_position`, `add_third_place_stage`.
+Migrations so far: `init`, `add_bracket_position`, `add_third_place_stage`,
+`add_advancing_teams` (`Tournament.advancingTeams`, nullable: null on older
+tournaments means top 2 per group).
 The player-count rewrite, player names, allocation and seeding needed **no**
 migrations (`Team.player1Name/player2Name` existed from day one).
 
@@ -124,10 +126,16 @@ points scored. There is **no head-to-head tiebreak** (by decision). Only
 `COMPLETED` matches count. If teams tie on all three, order is arbitrary.
 
 ### Knockout bracket (`bracket.ts`, `bracket-progress.ts`)
-- `seedFirstRound`: group winners get seeds 1..G, runners-up G+1..2G (both in
-  group order); pair with the standard seeded-bracket order (`seedOrder`). With
-  an even G this guarantees **round 1 never rematches two teams from the same
-  group**. Later rounds can reunite group-mates (same as real tournaments).
+- Teams advancing is chosen at group setup (`setup-groups`), validated against
+  `advancingOptions(groupSizes)` in `advancing.ts`: a power of 2, >= 2, <= 16,
+  and each group sends fewer teams than its smallest group. Because the group
+  count is also a power of 2 this is always the same k teams per group, so no
+  wildcard ranking exists. `generate-bracket` takes `standings.slice(0, k)` per
+  group.
+- `seedFirstRound(qualifiers, N)`: winners get seeds 1..G, second place G+1..2G,
+  and so on (each in group order); pair with the standard seeded-bracket order
+  (`seedOrder`). With an even G this guarantees **round 1 never rematches two
+  teams from the same group**. Later rounds can reunite group-mates (same as real tournaments).
 - `advanceBracketIfStageComplete` runs inside the same transaction as every
   knockout result save. When a stage's matches are all complete it pairs
   *consecutive winners by `bracketPosition`* into the next stage.

@@ -31,6 +31,10 @@ export const setupGroupsSchema = z.object({
     .min(MIN_PLAYER_COUNT, `Must be at least ${MIN_PLAYER_COUNT} players`)
     .max(MAX_PLAYER_COUNT, `Must be at most ${MAX_PLAYER_COUNT} players`)
     .refine((n) => n % 2 === 0, { message: "Player count must be even" }),
+  // Teams that advance to the elimination bracket. Which values are valid
+  // depends on the group split, so the route checks it (see advancing.ts);
+  // omitted = top 2 per group.
+  advancingTeams: z.number().int().optional(),
 });
 
 const playerNameField = z

@@ -55,23 +55,29 @@ export function isPowerOfTwo(n: number): boolean {
 }
 
 /**
- * Builds the first knockout round's pairings from each group's top 2 teams.
+ * Builds the first knockout round's pairings from each group's advancing
+ * teams.
  *
- * Seeding: group winners take seeds 1..G (in group-label order), runners-up
- * take seeds G+1..2G (same group-label order, not reversed). Because G is
- * always even here (groups come in 2/4/8 from the fixed 16/32/64 player
- * options), this guarantees every first-round match pairs a winner against
- * a runner-up from a *different* group — no team can face someone they
- * already played in pool play. (Later rounds are standard bracket
- * progression and could in principle reunite group-mates, same as most
- * real seeded tournaments — only round 1 is guaranteed rematch-free.)
+ * `advancingTeams` (a power of 2, a whole multiple of the group count) is how
+ * many teams make the bracket, so every group sends k = advancingTeams /
+ * groups teams, in finishing order.
+ *
+ * Seeding: all group winners take seeds 1..G (in group-label order), second
+ * place takes seeds G+1..2G (same group-label order, not reversed), and so
+ * on. Round 1 pairs seed s with seed N+1-s (the standard seeded-bracket
+ * order). Because G is even whenever k > 1, those two seeds are always from
+ * different groups — no team can face someone they already played in pool
+ * play. (Later rounds are standard bracket progression and could in
+ * principle reunite group-mates, same as most real seeded tournaments —
+ * only round 1 is guaranteed rematch-free.)
  */
 export function seedFirstRound(
   groupQualifiers: {
     groupLabel: string;
-    winnerTeamId: string;
-    runnerUpTeamId: string;
-  }[]
+    /** Advancing team ids in finishing order (best first). */
+    rankedTeamIds: string[];
+  }[],
+  advancingTeams: number
 ): [string, string][] {
   const g = groupQualifiers.length;
   if (!isPowerOfTwo(g)) {
@@ -79,6 +85,17 @@ export function seedFirstRound(
       `Elimination bracket needs a power-of-2 number of groups, got ${g}`
     );
   }
+  if (advancingTeams < 2 || !isPowerOfTwo(advancingTeams)) {
+    throw new Error(
+      `Elimination bracket needs a power-of-2 number of teams, got ${advancingTeams}`
+    );
+  }
+  if (advancingTeams % g !== 0) {
+    throw new Error(
+      `${advancingTeams} advancing teams can't be split evenly across ${g} groups`
+    );
+  }
+  const perGroup = advancingTeams / g;
 
   const ordered = [...groupQualifiers].sort((a, b) =>
     a.groupLabel.localeCompare(b.groupLabel)
@@ -86,11 +103,16 @@ export function seedFirstRound(
 
   const seedToTeam = new Map<number, string>();
   ordered.forEach((q, i) => {
-    seedToTeam.set(i + 1, q.winnerTeamId);
-    seedToTeam.set(g + i + 1, q.runnerUpTeamId);
+    for (let rank = 0; rank < perGroup; rank++) {
+      const teamId = q.rankedTeamIds[rank];
+      if (!teamId) {
+        throw new Error(`Group ${q.groupLabel} has fewer than ${perGroup} teams`);
+      }
+      seedToTeam.set(rank * g + i + 1, teamId);
+    }
   });
 
-  const order = seedOrder(g * 2);
+  const order = seedOrder(advancingTeams);
   const pairs: [string, string][] = [];
   for (let i = 0; i < order.length; i += 2) {
     const a = seedToTeam.get(order[i]);

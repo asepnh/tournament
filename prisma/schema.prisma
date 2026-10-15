@@ -41,21 +41,24 @@ model User {
 }
 
 model Tournament {
-  id          String           @id @default(cuid())
-  slug        String           @unique
-  name        String
-  description String?
-  status      TournamentStatus @default(SETUP)
-  format      TournamentFormat @default(POOL_PLAY)
-  playerCount Int?
-  ownerId     String
-  owner       User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  courts      Court[]
-  groups      Group[]
-  teams       Team[]
-  matches     Match[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id             String           @id @default(cuid())
+  slug           String           @unique
+  name           String
+  description    String?
+  status         TournamentStatus @default(SETUP)
+  format         TournamentFormat @default(POOL_PLAY)
+  playerCount    Int?
+  // Teams that advance to the elimination bracket (a power of 2, set when
+  // groups are created). Null on older tournaments = top 2 per group.
+  advancingTeams Int?
+  ownerId        String
+  owner          User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  courts         Court[]
+  groups         Group[]
+  teams          Team[]
+  matches        Match[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 model Court {

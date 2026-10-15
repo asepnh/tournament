@@ -75,12 +75,17 @@ architecture, decisions, operations runbook and known gotchas.
 
 - Once every pool match is complete, the admin can generate the elimination
   bracket from a button on the Matches panel.
-- The top 2 teams per group qualify. First-round seeding pairs each group's
-  winner against a **different** group's runner-up (see
+- The admin chooses how many teams advance when creating the groups (the
+  "Teams advancing" dropdown next to the player count). The choices are the
+  powers of 2 the groups allow, e.g. 4, 8 or 16 teams for 4 groups — which
+  works out to the same number of teams from every group (top 1, 2 or 4).
+  Default is the top 2 per group. See `src/lib/advancing.ts`.
+- First-round seeding gives all group winners seeds 1..G, second place
+  G+1..2G, and so on, then pairs seed s against seed N+1-s (see
   `seedFirstRound` in `src/lib/bracket.ts`), so no team can face an
   opponent they already played in pool play, in round 1.
-- Bracket size is always a power of 2 (since the group count always is —
-  see above), so there's never a need for byes.
+- Bracket size is always a power of 2 (the group count and the advancing
+  count both are), so there's never a need for byes.
 - Once every match in a knockout stage (Semifinal, Quarterfinal, Round of
   16) is complete, the app **automatically** generates the next stage by
   pairing consecutive winners in bracket order (`src/lib/bracket-progress.ts`)

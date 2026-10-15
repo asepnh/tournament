@@ -4,8 +4,8 @@
  *
  * Constraints:
  * - The elimination bracket needs the number of *groups* to be a power of 2
- *   (each group sends its top 2 forward; see src/lib/bracket.ts), so it
- *   never needs byes.
+ *   (each group sends the same number of teams forward; see
+ *   src/lib/advancing.ts and src/lib/bracket.ts), so it never needs byes.
  * - Each group should have between 3 and 6 teams (set by product decision —
  *   not too small to be a meaningful pool, not so large the round robin
  *   takes forever).

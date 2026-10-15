@@ -5,6 +5,7 @@ import { getOwnedTournament } from "@/lib/authz";
 import { setupGroupsSchema } from "@/lib/validation";
 import { indexToLetters } from "@/lib/labels";
 import { planGroupSizes } from "@/lib/groupPlanning";
+import { advancingOptions, defaultAdvancing } from "@/lib/advancing";
 
 export async function POST(
   request: Request,
@@ -46,13 +47,23 @@ export async function POST(
   const { playerCount } = parsed.data;
   const teamCount = playerCount / 2;
   const groupSizes = planGroupSizes(teamCount);
+  const advancingTeams =
+    parsed.data.advancingTeams ?? defaultAdvancing(groupSizes);
+  if (!advancingOptions(groupSizes).includes(advancingTeams)) {
+    return NextResponse.json(
+      {
+        error: `Teams advancing must be one of: ${advancingOptions(groupSizes).join(", ")}`,
+      },
+      { status: 400 }
+    );
+  }
 
   try {
     await prisma.$transaction(
       async (tx) => {
         await tx.tournament.update({
           where: { id },
-          data: { playerCount },
+          data: { playerCount, advancingTeams },
         });
 
         // Groups are created sequentially (each needs its own id before we

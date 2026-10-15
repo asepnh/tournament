@@ -5,6 +5,7 @@ import { getOwnedTournament } from "@/lib/authz";
 import { computeGroupStandings } from "@/lib/standings";
 import { isPowerOfTwo, seedFirstRound, stageForTeamCount } from "@/lib/bracket";
 import { createStageMatches } from "@/lib/bracket-progress";
+import { advancingOptions } from "@/lib/advancing";
 
 export async function POST(
   _request: Request,
@@ -70,6 +71,18 @@ export async function POST(
     );
   }
 
+  // Tournaments created before this was configurable advance the top 2.
+  const advancingTeams = tournament.advancingTeams ?? groups.length * 2;
+  if (
+    !advancingOptions(groups.map((g) => g.teams.length)).includes(advancingTeams)
+  ) {
+    return NextResponse.json(
+      { error: `${advancingTeams} advancing teams isn't valid for these groups` },
+      { status: 400 }
+    );
+  }
+  const perGroup = advancingTeams / groups.length;
+
   const groupQualifiers = groups.map((group) => {
     const standings = computeGroupStandings(
       group.teams.map((t) => t.id),
@@ -87,13 +100,12 @@ export async function POST(
     );
     return {
       groupLabel: group.label,
-      winnerTeamId: standings[0].teamId,
-      runnerUpTeamId: standings[1].teamId,
+      rankedTeamIds: standings.slice(0, perGroup).map((s) => s.teamId),
     };
   });
 
-  const pairs = seedFirstRound(groupQualifiers);
-  const stage = stageForTeamCount(groups.length * 2);
+  const pairs = seedFirstRound(groupQualifiers, advancingTeams);
+  const stage = stageForTeamCount(advancingTeams);
 
   await prisma.$transaction(async (tx) => {
     await createStageMatches(

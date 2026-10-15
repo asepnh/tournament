@@ -12,12 +12,15 @@ export function MatchesPanel({
   matches,
   groups,
   courts,
+  advancingTeams,
   onChange,
 }: {
   tournamentId: string;
   matches: AdminMatch[];
   groups: AdminGroup[];
   courts: AdminCourt[];
+  /** Teams that make the bracket; null = top 2 per group (older tournaments). */
+  advancingTeams: number | null;
   onChange: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +53,7 @@ export function MatchesPanel({
   const poolComplete =
     poolMatches.length > 0 && poolMatches.every((m) => m.status === "COMPLETED");
   const canGenerateBracket = poolComplete && bracketMatches.length === 0;
+  const bracketTeams = advancingTeams ?? groups.length * 2;
 
   async function handleGenerate() {
     setError(null);
@@ -155,7 +159,9 @@ export function MatchesPanel({
         <div className="mt-6 border-t border-navy-200 pt-4">
           <p className="mb-3 text-sm text-navy-600">
             Pool play is complete. Generate the elimination bracket from the
-            top 2 teams in each group.
+            top {bracketTeams / Math.max(groups.length, 1)} team
+            {bracketTeams / Math.max(groups.length, 1) === 1 ? "" : "s"} in
+            each group ({bracketTeams} teams).
           </p>
           <Button onClick={handleGenerateBracket} disabled={bracketLoading}>
             {bracketLoading ? "Generating..." : "Generate elimination bracket"}
