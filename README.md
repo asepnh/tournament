@@ -5,6 +5,9 @@ tournament, set up doubles pool play, generate the match schedule across your
 courts, and share one public link where anyone can follow live results and
 group standings — no sign-in required.
 
+New to the project? Read [HANDOVER.md](HANDOVER.md) for the concepts,
+architecture, decisions, operations runbook and known gotchas.
+
 ## Stack
 
 - **Next.js 16** (App Router) + TypeScript
