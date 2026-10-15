@@ -64,6 +64,7 @@ export function PlayerNamesPanel({
   }
 
   const rosterCount = parseLines(roster).length;
+  const seedCount = parseLines(seeds).length;
 
   function updateName(
     teamId: string,
@@ -111,7 +112,7 @@ export function PlayerNamesPanel({
     }
   }
 
-  async function handleRandomize() {
+  async function handleAllocate() {
     setError(null);
     setSaved(false);
 
@@ -173,11 +174,13 @@ export function PlayerNamesPanel({
 
       <div className="mb-6 rounded-lg border border-navy-200 p-3">
         <p className="mb-2 text-sm font-semibold text-navy-900">
-          Randomize pairing
+          Allocate players
         </p>
         <p className="mb-2 text-sm text-navy-600">
           Paste or type all {expectedCount} players, one name per line, then
-          randomly pair them into teams and assign them across the groups.
+          pair them into teams and assign them across the groups. Seeded
+          players (below) are placed by the seeding rules; everyone else is
+          random. Clicking again re-shuffles the unseeded players.
         </p>
         <Textarea
           rows={6}
@@ -194,22 +197,26 @@ export function PlayerNamesPanel({
             Seeded players (optional)
           </p>
           <p className="mb-2 text-xs text-navy-500">
-            List a few names from the roster above, one per line, in
-            priority order (first = seed 1). Each seed is paired with a
-            random unseeded partner and spread into a different group from
-            the other seeds.
+            List names from the roster above, one per line, in priority
+            order (first = seed 1).{" "}
+            {groups.length === 4
+              ? "With 4 groups, seeds are placed snake-style so teams and groups are evenly balanced: seed 1 is paired with seed 8, 2 with 7, 3 with 6, 4 with 5, then 9 with 16, and so on. Players who aren't seeded fill the remaining spots at random."
+              : "Each seed is paired with a random unseeded partner and spread into a different group from the other seeds."}
           </p>
           <Textarea
-            rows={3}
+            rows={8}
             value={seeds}
             onChange={(e) => setSeeds(e.target.value)}
             placeholder={`Top player\nSecond-best player\n...`}
           />
+          <div className="mt-1 text-xs text-navy-400">
+            {seedCount} seed{seedCount === 1 ? "" : "s"} entered
+          </div>
         </div>
 
         <div className="mt-3 flex justify-end">
-          <Button onClick={handleRandomize} disabled={loading} variant="secondary">
-            {loading ? "Randomizing..." : "Randomize Pairing"}
+          <Button onClick={handleAllocate} disabled={loading} variant="secondary">
+            {loading ? "Allocating..." : "Allocate Players"}
           </Button>
         </div>
       </div>

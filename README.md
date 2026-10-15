@@ -97,22 +97,24 @@ architecture, decisions, operations runbook and known gotchas.
   views, e.g. "A1 (John & Jane)" — falling back to just the label
   otherwise.
 
-### Phase 3 — bulk roster + randomized pairing
+### Phase 3 — bulk roster + player allocation
 
 - On the Player names panel, the admin can paste the full player roster
   (one name per line — must exactly match the tournament's player count)
-  and click **Randomize Pairing** to shuffle everyone and assign random
-  pairs across all the existing team slots in one action (saves
-  immediately; click again anytime to fully re-shuffle). The manual
-  per-team name fields still work for touch-ups afterward (fixing a typo,
-  swapping one pair) without re-randomizing everyone.
-- Optional seeding: alongside the roster, the admin can list a handful of
-  player names (in priority order) as seeds. Each seed is paired with a
-  random unseeded partner and that team is spread into a different group
-  than the other seeds, cycling through the groups in order (see
-  `randomizePairing` in `src/lib/randomizePairing.ts`). Seeding is
-  ephemeral — it's only used at the moment Randomize Pairing is clicked,
-  not saved anywhere, so re-randomizing later means re-listing the seeds.
+  and click **Allocate Players** to pair everyone into teams and assign
+  them across all the existing team slots in one action (saves
+  immediately; click again anytime to re-shuffle the unseeded players).
+  The manual per-team name fields still work for touch-ups afterward
+  (fixing a typo, swapping one pair) without re-allocating everyone.
+- Optional seeding: alongside the roster, the admin can list player names
+  in priority order (first = seed 1). With exactly 4 groups, seeds are laid
+  out snake-style across the team rows (seed 1 pairs with seed 8, 2 with 7,
+  ...; the group order rotates each row) so every team row and every group
+  has the same seed strength. With any other group count, each seed gets a
+  random unseeded partner and seeds are spread across groups by cycling.
+  See `randomizePairing` in `src/lib/randomizePairing.ts`. Seeding is
+  ephemeral — it's only used at the moment Allocate Players is clicked,
+  not saved anywhere, so re-allocating later means re-listing the seeds.
 
 Configurable formats (singles/doubles, custom group sizes, round robin
 only, choice of scoring format, etc.) are planned for a later phase; see

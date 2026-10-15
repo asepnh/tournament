@@ -59,7 +59,8 @@ SWR · zod. Exact versions are in `package.json`.
 3. Enter total players (even, 8-96) -> groups and **team slots** are created
    (`A1, A2, ... B1 ...`). No names yet.
 4. (Optional) Enter player names, either per team or paste a roster and
-   **Randomize Pairing** (with optional seeds).
+   **Allocate Players** (pairs them into teams; optional seeds are placed by
+   the seeding rules, everyone else is random).
 5. Generate pool matches (round robin inside each group, spread over courts).
 6. Enter scores. Standings recompute live.
 7. When all pool matches are done, **Generate elimination bracket**. After that
@@ -93,7 +94,7 @@ SWR · zod. Exact versions are in `package.json`.
 - Everything cascades from `Tournament`, so deleting a tournament cleans up.
 
 Migrations so far: `init`, `add_bracket_position`, `add_third_place_stage`.
-The player-count rewrite, player names, randomize and seeding needed **no**
+The player-count rewrite, player names, allocation and seeding needed **no**
 migrations (`Team.player1Name/player2Name` existed from day one).
 
 ## 5. How the core logic works
@@ -134,12 +135,30 @@ points scored. There is **no head-to-head tiebreak** (by decision). Only
   (losers). Completing the Final sets the tournament `COMPLETED`. Completing 3rd
   Place does not (only the Final decides the champion).
 
-### Randomize + seeding (`randomizePairing.ts`, runs in the browser)
-Roster must match the team count exactly. Seeds (optional, priority order) are
-each paired with a random **unseeded** partner and placed into groups by cycling
-(seed 1 -> group A, seed 2 -> B, ... wrapping when seeds > groups). Everyone
-else is shuffled into the remaining slots. Seeds are **not stored**; they only
-exist for the click. Saves via `PATCH /api/tournaments/[id]/teams`.
+### Player allocation + seeding (`randomizePairing.ts`, runs in the browser; the UI button is "Allocate Players")
+Roster must match the team count exactly. Seeds are an optional, priority-ordered
+list of roster names (first = seed 1). Two layouts, chosen by group count:
+
+- **Exactly 4 groups (the organizer's snake table):** each team *row*
+  (A1-D1, A2-D2, ...) is a tier that consumes 8 seeds. The first 4 go forward
+  across the groups, the next 4 come back in reverse, so teams are 1+8, 2+7,
+  3+6, 4+5, then 9+16, ... Every team in a row has the same strength total and
+  every group's seed total is equal (75 across three rows). Group order per
+  row is hard-coded in `FOUR_GROUP_TIER_ORDERS`: rows 1-3 are the organizer's
+  table (A,C,B,D / D,B,C,A / B,D,A,C); row 4 (C,A,D,B) is our own completion of
+  the rotation and only matters with >24 seeds; rows 5+ cycle. Seeds fill the
+  table top-down; a team that only gets one seed gets a random unseeded
+  partner; everything not seeded is shuffled into the remaining slots.
+  Groups with fewer teams skip the rows they don't have.
+- **Any other group count:** each seed gets a random *unseeded* partner and is
+  placed by cycling through the groups (seed 1 -> A, 2 -> B, ... wrapping).
+  Seeds never share a team here.
+
+To support another group count, add its tier orders and branch on
+`groups.length` in `randomizePairing`. Seeds are **not stored**; they only exist
+for the click. Saves via `PATCH /api/tournaments/[id]/teams`. Verified with the
+real module (no copy) against the table: exact placement for 16/18/24 seeds,
+equal group totals, every player used once, plus uneven-group edge cases.
 
 ## 6. API map
 
