@@ -98,14 +98,15 @@ export function MatchesPanel({
   }
 
   if (matches.length === 0) {
-    const canGenerate = groups.length > 0 && courts.length > 0;
+    const canGenerate =
+      groups.length > 0 && courts.some((c) => c.phase === "POOL");
     return (
       <Card>
         <h2 className="mb-2 text-lg font-semibold text-navy-900">Matches</h2>
         <p className="mb-4 text-sm text-navy-600">
           {canGenerate
             ? "Generate the pool play schedule across your courts."
-            : "Add courts and set up groups first, then generate the match schedule."}
+            : "Add group stage courts and set up groups first, then generate the match schedule."}
         </p>
         <Button onClick={handleGenerate} disabled={!canGenerate || loading}>
           {loading ? "Generating..." : "Generate matches"}

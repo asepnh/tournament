@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getOwnedTournament } from "@/lib/authz";
 import { buildGlobalSchedule } from "@/lib/scheduling";
+import { poolCourtIds } from "@/lib/courts";
 
 export async function POST(
   _request: Request,
@@ -47,9 +48,10 @@ export async function POST(
       { status: 400 }
     );
   }
-  if (courts.length === 0) {
+  const courtIds = poolCourtIds(courts);
+  if (courtIds.length === 0) {
     return NextResponse.json(
-      { error: "Add at least one court before generating matches" },
+      { error: "Add at least one group stage court before generating matches" },
       { status: 400 }
     );
   }
@@ -62,7 +64,7 @@ export async function POST(
 
   const schedule = buildGlobalSchedule(
     groups.map((g) => ({ id: g.id, teamIds: g.teams.map((t) => t.id) })),
-    courts.map((c) => c.id)
+    courtIds
   );
 
   await prisma.$transaction([

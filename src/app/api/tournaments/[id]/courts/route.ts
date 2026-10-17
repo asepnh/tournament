@@ -28,8 +28,28 @@ export async function POST(
     );
   }
 
+  // Group stage courts lock once the pool schedule exists; elimination
+  // courts stay editable until the bracket has been generated.
+  const { name, phase } = parsed.data;
+  const lockedStage =
+    phase === "POOL" ? { stage: "POOL" as const } : { stage: { not: "POOL" as const } };
+  const lockedMatches = await prisma.match.count({
+    where: { tournamentId: id, ...lockedStage },
+  });
+  if (lockedMatches > 0) {
+    return NextResponse.json(
+      {
+        error:
+          phase === "POOL"
+            ? "Group stage courts are locked once matches have been generated"
+            : "Elimination courts are locked once the bracket has been generated",
+      },
+      { status: 409 }
+    );
+  }
+
   const court = await prisma.court.create({
-    data: { name: parsed.data.name, tournamentId: id },
+    data: { name, phase, tournamentId: id },
   });
 
   return NextResponse.json({ court }, { status: 201 });

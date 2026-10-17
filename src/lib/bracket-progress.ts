@@ -1,5 +1,6 @@
 import type { Prisma, MatchStage } from "@prisma/client";
 import { nextStage, type KnockoutStage } from "./bracket";
+import { eliminationCourtIds } from "./courts";
 
 type Tx = Prisma.TransactionClient;
 
@@ -76,7 +77,7 @@ export async function advanceBracketIfStageComplete(
     where: { tournamentId },
     orderBy: { createdAt: "asc" },
   });
-  const courtIds = courts.map((c) => c.id);
+  const courtIds = eliminationCourtIds(courts);
 
   // Guard against generating a stage twice if this runs concurrently for
   // two matches finishing at nearly the same time.

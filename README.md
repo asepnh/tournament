@@ -64,6 +64,11 @@ architecture, decisions, operations runbook and known gotchas.
   matches are distributed across courts, and a "round" is one wave of
   matches — a court's next match only becomes the next round once every
   court has a match in the current round.
+- Courts are set up in two lists: **group stage courts** (pool play) and
+  **elimination courts** (knockout rounds), so e.g. 4 courts for pool play and
+  3 for the bracket. Leave the elimination list empty to reuse the group stage
+  courts. Group stage courts lock once the schedule is generated; elimination
+  courts stay editable until the bracket is generated.
 - The admin enters a single game score per match (e.g. 11-7); winners and
   group standings (points, wins/losses, point differential) are computed
   automatically. Best-of-N / multi-set scoring is planned for Phase 4, when

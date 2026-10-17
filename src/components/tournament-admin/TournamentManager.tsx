@@ -47,6 +47,7 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
   }
 
   const matchesGenerated = data.matches.length > 0;
+  const bracketGenerated = data.matches.some((m) => m.stage !== "POOL");
   const finalMatch = data.matches.find(
     (m) => m.stage === "FINAL" && m.status === "COMPLETED"
   );
@@ -87,7 +88,8 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
       <CourtsPanel
         tournamentId={data.tournament.id}
         courts={data.courts}
-        locked={matchesGenerated}
+        poolLocked={matchesGenerated}
+        eliminationLocked={bracketGenerated}
         onChange={refresh}
       />
 

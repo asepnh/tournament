@@ -55,7 +55,8 @@ SWR · zod. Exact versions are in `package.json`.
 **Lifecycle (admin does each step in order, on one page):**
 
 1. Create tournament (gets a unique public slug).
-2. Add courts.
+2. Add courts: group stage courts (pool play) and, optionally, a separate
+   elimination court list (empty = reuse the group stage courts).
 3. Enter total players (even, 8-96) -> groups and **team slots** are created
    (`A1, A2, ... B1 ...`). No names yet.
 4. (Optional) Enter player names, either per team or paste a roster and
@@ -96,7 +97,8 @@ SWR · zod. Exact versions are in `package.json`.
 Migrations so far: `init`, `add_bracket_position`, `add_third_place_stage`,
 `add_advancing_teams` (`Tournament.advancingTeams`, nullable: null on older
 tournaments means top 2 per group), `add_user_super_admin` (`User.isSuperAdmin`,
-default false).
+default false), `add_court_phase` (`Court.phase`, default `POOL`; courts used for the
+bracket are the `ELIMINATION` ones, else all courts — see `src/lib/courts.ts`).
 The player-count rewrite, player names, allocation and seeding needed **no**
 migrations (`Team.player1Name/player2Name` existed from day one).
 
@@ -180,7 +182,7 @@ All admin routes require a session and check `getOwnedTournament`.
 | `/api/auth/[...nextauth]` | Auth.js handlers |
 | `GET/POST /api/tournaments` | List / create |
 | `GET/DELETE /api/tournaments/[id]` | Full admin detail / delete |
-| `POST .../courts`, `DELETE .../courts/[courtId]` | Courts (delete blocked once matches use it) |
+| `POST .../courts` (`phase`: `POOL`/`ELIMINATION`), `DELETE .../courts/[courtId]` | Courts. Add is 409 for POOL once pool matches exist, for ELIMINATION once the bracket exists; delete blocked once matches use the court |
 | `POST .../setup-groups` | Create groups/teams from player count (409 if already done) |
 | `PATCH .../teams` | Bulk save player names |
 | `POST .../generate-matches` | Build pool schedule (409 if matches exist) |

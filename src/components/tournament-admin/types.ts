@@ -8,9 +8,12 @@ export type AdminTournament = {
   advancingTeams: number | null;
 };
 
+export type CourtPhase = "POOL" | "ELIMINATION";
+
 export type AdminCourt = {
   id: string;
   name: string;
+  phase: CourtPhase;
 };
 
 export type AdminTeam = {

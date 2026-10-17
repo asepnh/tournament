@@ -13,6 +13,8 @@ export const createTournamentSchema = z.object({
 
 export const addCourtSchema = z.object({
   name: z.string().trim().min(1, "Court name is required").max(60),
+  // Group stage vs elimination round; omitted = group stage.
+  phase: z.enum(["POOL", "ELIMINATION"]).default("POOL"),
 });
 
 // Groups end up with 3-6 teams each, and the group count is always chosen to

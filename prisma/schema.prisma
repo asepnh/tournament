@@ -26,6 +26,14 @@ enum MatchStage {
   FINAL
 }
 
+// Which part of the tournament a court is used for. Older courts are POOL;
+// a tournament with no ELIMINATION courts reuses its POOL courts for the
+// bracket.
+enum CourtPhase {
+  POOL
+  ELIMINATION
+}
+
 enum MatchStatus {
   SCHEDULED
   COMPLETED
@@ -67,6 +75,7 @@ model Tournament {
 model Court {
   id           String     @id @default(cuid())
   name         String
+  phase        CourtPhase @default(POOL)
   tournamentId String
   tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   matches      Match[]

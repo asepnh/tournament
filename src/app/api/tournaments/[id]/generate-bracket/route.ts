@@ -6,6 +6,7 @@ import { computeGroupStandings } from "@/lib/standings";
 import { isPowerOfTwo, seedFirstRound, stageForTeamCount } from "@/lib/bracket";
 import { createStageMatches } from "@/lib/bracket-progress";
 import { advancingOptions } from "@/lib/advancing";
+import { eliminationCourtIds } from "@/lib/courts";
 
 export async function POST(
   _request: Request,
@@ -41,7 +42,10 @@ export async function POST(
     prisma.match.findMany({
       where: { tournamentId: id, stage: "POOL" },
     }),
-    prisma.court.findMany({ where: { tournamentId: id } }),
+    prisma.court.findMany({
+      where: { tournamentId: id },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
 
   if (groups.length === 0 || poolMatches.length === 0) {
@@ -64,9 +68,10 @@ export async function POST(
       { status: 400 }
     );
   }
-  if (courts.length === 0) {
+  const courtIds = eliminationCourtIds(courts);
+  if (courtIds.length === 0) {
     return NextResponse.json(
-      { error: "Add at least one court first" },
+      { error: "Add at least one elimination court first" },
       { status: 400 }
     );
   }
@@ -113,7 +118,7 @@ export async function POST(
       id,
       stage,
       pairs,
-      courts.map((c) => c.id)
+      courtIds
     );
   });
 
