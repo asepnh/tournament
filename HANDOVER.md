@@ -44,7 +44,7 @@ SWR · zod. Exact versions are in `package.json`.
 | `standings.ts` | Points / differential ranking |
 | `bracket.ts` | Knockout seeding, stage names, stage chain |
 | `bracket-progress.ts` | Auto-generates the next knockout stage (and 3rd place) |
-| `randomizePairing.ts` | Shuffle roster into teams, with optional seeding |
+| `randomizePairing.ts` | Allocate roster into teams/groups: snake-placed seeds, partners from the top of the roster, rest random |
 | `public-tournament.ts` | Builds the whole public payload (used by page *and* API) |
 | `validation.ts` | All zod schemas and the 8-96 player limits |
 | `authz.ts` | `getOwnedTournament` ownership check |
@@ -145,34 +145,30 @@ points scored. There is **no head-to-head tiebreak** (by decision). Only
   Place does not (only the Final decides the champion).
 
 ### Player allocation + seeding (`randomizePairing.ts`, runs in the browser; the UI button is "Allocate Players")
-Roster must match the team count exactly. Seeds are an optional, priority-ordered
-list of roster names (first = seed 1). Two layouts, chosen by group count:
+Roster must match the team count exactly, and **roster order matters**: earliest
+= strongest. Seeds are an optional, priority-ordered list of roster names
+(first = seed 1).
 
-- **Exactly 4 groups (the organizer's snake table):** each team *row*
-  (A1-D1, A2-D2, ...) is a tier that consumes 8 seeds. The first 4 go forward
-  across the groups, the next 4 come back in reverse, so teams are 1+8, 2+7,
-  3+6, 4+5, then 9+16, ... Every team in a row has the same strength total and
-  every group's seed total is equal (75 across three rows). Group order per
-  row is hard-coded in `FOUR_GROUP_TIER_ORDERS`: rows 1-3 are the organizer's
-  table (A,C,B,D / D,B,C,A / B,D,A,C); row 4 (C,A,D,B) is our own completion of
-  the rotation and only matters with >24 seeds; rows 5+ cycle. Seeds fill the
-  table top-down; everything not seeded is shuffled into the remaining slots.
-  Groups with fewer teams skip the rows they don't have. Seeds only partner
-  each other when the seed count is **< 8 or an exact multiple of 8**:
-  multiples of 8 use the snake pairs above; fewer than 8 pair high-low among
-  themselves (5 seeds: 1+5, 2+4, seed 3 gets an unseeded partner), one team per
-  group in row 1's order. Any other count (9-15, 17-23, ...) gives every seed its
-  own team with a random unseeded partner, placed in the table's group order
-  row by row (`placeSoloSeedsByTable`); more seeds than teams throws.
-- **Any other group count:** each seed gets a random *unseeded* partner and is
-  placed by cycling through the groups (seed 1 -> A, 2 -> B, ... wrapping).
-  Seeds never share a team here.
+- **Seeds never partner each other.** Every seed gets a team of their own
+  (more seeds than teams throws).
+- **Placement, exactly 4 groups (the organizer's snake table):** each team *row*
+  (A1-D1, A2-D2, ...) takes the next 4 seeds, one per group, in the order set in
+  `FOUR_GROUP_TIER_ORDERS`: row 1 A,C,B,D / row 2 D,B,C,A / row 3 B,D,A,C /
+  row 4 C,A,D,B (our own completion of the rotation, only reached with >12
+  seeds) / rows 5+ cycle. Groups with fewer teams skip the rows they don't
+  have. **Any other group count:** seeds are spread by cycling through the groups
+  (seed 1 -> A, 2 -> B, ... wrapping).
+- **Partners:** after the seeds are removed from the roster, the first S
+  unseeded names in roster order (S = number of seeds) are dealt out to the
+  seeds at random. This keeps players listed far down the roster from being
+  paired with a top seed. Everyone left is shuffled into the remaining slots.
 
 To support another group count, add its tier orders and branch on
 `groups.length` in `randomizePairing`. Seeds are **not stored**; they only exist
 for the click. Saves via `PATCH /api/tournaments/[id]/teams`. Verified with the
-real module (no copy) against the table: exact placement for 16/18/24 seeds,
-equal group totals, every player used once, plus uneven-group edge cases.
+real module (no copy): exact snake placement for 4/8/12/20 seeds, partners only
+from the next S unseeded names, seeds scattered through the roster, every player
+used once, plus uneven-group edge cases.
 
 ## 6. API map
 

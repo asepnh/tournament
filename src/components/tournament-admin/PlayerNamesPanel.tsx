@@ -178,9 +178,10 @@ export function PlayerNamesPanel({
         </p>
         <p className="mb-2 text-sm text-navy-600">
           Paste or type all {expectedCount} players, one name per line, then
-          pair them into teams and assign them across the groups. Seeded
-          players (below) are placed by the seeding rules; everyone else is
-          random. Clicking again re-shuffles the unseeded players.
+          pair them into teams and assign them across the groups. List the
+          stronger players first: seeds are partnered with players from the
+          top of this list, and everyone else is random. Clicking again
+          re-shuffles.
         </p>
         <Textarea
           rows={6}
@@ -198,10 +199,13 @@ export function PlayerNamesPanel({
           </p>
           <p className="mb-2 text-xs text-navy-500">
             List names from the roster above, one per line, in priority
-            order (first = seed 1).{" "}
+            order (first = seed 1). Each seed gets a team of their own and
+            is never paired with another seed.
             {groups.length === 4
-              ? "With 4 groups, seeds are placed snake-style so groups are evenly balanced. If you list fewer than 8 seeds or a multiple of 8 (8, 16, 24), seeds are paired with each other: seed 1 with 8, 2 with 7, 3 with 6, 4 with 5, then 9 with 16, and so on. With any other number, each seed is paired with a random unseeded player. Players who aren't seeded fill the remaining spots at random."
-              : "Each seed is paired with a random unseeded partner and spread into a different group from the other seeds."}
+              ? " With 4 groups, seeds 1-4 go in the first team row, 5-8 in the second (in reverse group order), and so on, so the groups stay balanced."
+              : " Seeds are spread across the groups in turn."}{" "}
+            Each seed&apos;s partner is picked at random from the next{" "}
+            {seedCount || "N"} unseeded names at the top of the roster.
           </p>
           <Textarea
             rows={8}
