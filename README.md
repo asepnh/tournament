@@ -61,7 +61,7 @@ architecture, decisions, operations runbook and known gotchas.
   `planGroupSizes` in `src/lib/groupPlanning.ts`. The app automatically
   creates the groups and labels every team (A1–A4, B1–B6, …).
 - The admin generates the match schedule: each group plays full round robin,
-  matches are distributed across courts, and a "round" is one wave of
+  matches are distributed across courts (5-team groups are ordered so no team plays twice in a row), and a "round" is one wave of
   matches — a court's next match only becomes the next round once every
   court has a match in the current round.
 - Courts are set up in two lists: **group stage courts** (pool play) and

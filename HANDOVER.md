@@ -116,12 +116,24 @@ extra). These windows tile with no gaps, so every even count 8-96 works
 
 ### Round robin + court schedule (`scheduling.ts`)
 - `roundRobinPairs`: circle method for any group size. Odd sizes add a bye slot,
-  so each team sits out exactly one round.
+  so each team sits out exactly one round. **5-team groups are the exception:**
+  they use a fixed 10-match order (`FIVE_TEAM_ORDER`) in which no team plays twice
+  in a row (breaks are 1 or 2 rounds). It was found by brute force over all 10!
+  orders: only 240 qualify, all with the same rest pattern, so only the *role*
+  assignment is free, and teams are shuffled into the roles at random each time
+  the schedule is generated. 3- and 4-team groups can't avoid back-to-back games
+  (minimum 2); 6-team groups could (an order exists) but it isn't wired up.
 - `buildGlobalSchedule`: builds one queue by taking each group's next match in
   turn (so groups progress in lockstep; smaller groups simply finish earlier),
   then chunks the queue into batches of `courts.length`. One batch = one global
   round, each match on a distinct court. A court's next match is therefore the
-  next round.
+  next round. With as many courts as groups (and equal sizes) each group ends up
+  on one court, as a side effect of the interleaving, not a rule.
+- **Known limitation:** the no-back-to-back guarantee for 5-team groups only holds
+  when courts <= groups. With more courts than groups a team can play two rounds
+  in a row, and with mixed sizes (e.g. 6+5 groups on 3-4 courts) the 6-team
+  group's order can put the same team in two matches of the *same* round (this
+  predates the 5-team change; the old scheduler did it too).
 
 ### Standings (`standings.ts`)
 Rank by points, then point differential (points scored minus conceded), then

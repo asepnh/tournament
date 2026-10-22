@@ -1,4 +1,26 @@
 /**
+ * Match order for a 5-team group in which no team ever plays two matches in
+ * a row (checked against all 10! orderings: only 240 achieve it, all with
+ * the same rest pattern — every break is 1 or 2 rounds). Teams are 0-4;
+ * the roles (who rests how long) go to the real teams at random, see
+ * restOptimizedFiveTeamPairs.
+ */
+const FIVE_TEAM_ORDER: [number, number][] = [
+  [0, 1], [2, 3], [0, 4], [1, 2], [3, 4],
+  [0, 2], [1, 3], [2, 4], [0, 3], [1, 4],
+];
+
+function restOptimizedFiveTeamPairs(teamIds: string[]): [string, string][] {
+  // Fisher-Yates shuffle: which team gets which rest role is random.
+  const roles = [...teamIds];
+  for (let i = roles.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [roles[i], roles[j]] = [roles[j], roles[i]];
+  }
+  return FIVE_TEAM_ORDER.map(([a, b]) => [roles[a], roles[b]]);
+}
+
+/**
  * Round-robin pairing for a group of any size (3-6 teams) using the
  * standard "circle method": fix one team, rotate the rest each round. For
  * an odd team count, a "bye" slot is added to make the rotation even —
@@ -8,11 +30,17 @@
  *
  * Returns the matches in round order (only real matches — bye slots are
  * dropped), covering all C(N,2) unique pairings exactly once.
+ *
+ * 5-team groups use a fixed order instead (with the teams assigned to its
+ * roles at random) so that no team plays twice in a row.
  */
 export function roundRobinPairs(teamIds: string[]): [string, string][] {
   const n = teamIds.length;
   if (n < 2) {
     throw new Error("roundRobinPairs needs at least 2 teams");
+  }
+  if (n === 5) {
+    return restOptimizedFiveTeamPairs(teamIds);
   }
 
   const hasBye = n % 2 !== 0;
