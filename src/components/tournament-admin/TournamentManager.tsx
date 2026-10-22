@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { PublicLinkBanner } from "./PublicLinkBanner";
 import { CourtsPanel } from "./CourtsPanel";
 import { PlayerSetupPanel } from "./PlayerSetupPanel";
+import { AdvancingPanel } from "./AdvancingPanel";
 import { PlayerNamesPanel } from "./PlayerNamesPanel";
 import { MatchesPanel } from "./MatchesPanel";
 import { StandingsPanel } from "./StandingsPanel";
@@ -96,6 +97,14 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
       <PlayerSetupPanel
         tournamentId={data.tournament.id}
         groups={data.groups}
+        onChange={refresh}
+      />
+
+      <AdvancingPanel
+        tournamentId={data.tournament.id}
+        groups={data.groups}
+        advancingTeams={data.tournament.advancingTeams}
+        locked={bracketGenerated}
         onChange={refresh}
       />
 

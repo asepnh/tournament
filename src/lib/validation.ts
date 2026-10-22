@@ -39,6 +39,10 @@ export const setupGroupsSchema = z.object({
   advancingTeams: z.number().int().optional(),
 });
 
+export const updateAdvancingSchema = z.object({
+  advancingTeams: z.number().int(),
+});
+
 const playerNameField = z
   .string()
   .trim()

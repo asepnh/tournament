@@ -84,7 +84,8 @@ architecture, decisions, operations runbook and known gotchas.
   "Teams advancing" dropdown next to the player count). The choices are the
   powers of 2 the groups allow, e.g. 4, 8 or 16 teams for 4 groups — which
   works out to the same number of teams from every group (top 1, 2 or 4).
-  Default is the top 2 per group. See `src/lib/advancing.ts`.
+  Default is the top 2 per group. See `src/lib/advancing.ts`. It can be changed
+  from the **Teams advancing** card at any time until the bracket is generated.
 - First-round seeding gives all group winners seeds 1..G, second place
   G+1..2G, and so on, then pairs seed s against seed N+1-s (see
   `seedFirstRound` in `src/lib/bracket.ts`), so no team can face an

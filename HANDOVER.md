@@ -129,7 +129,8 @@ points scored. There is **no head-to-head tiebreak** (by decision). Only
 `COMPLETED` matches count. If teams tie on all three, order is arbitrary.
 
 ### Knockout bracket (`bracket.ts`, `bracket-progress.ts`)
-- Teams advancing is chosen at group setup (`setup-groups`), validated against
+- Teams advancing is chosen at group setup (`setup-groups`) and can be changed
+  until the bracket exists (`PATCH .../advancing`, `AdvancingPanel`), validated against
   `advancingOptions(groupSizes)` in `advancing.ts`: a power of 2, >= 2, <= 16,
   and each group sends fewer teams than its smallest group. Because the group
   count is also a power of 2 this is always the same k teams per group, so no
@@ -185,6 +186,7 @@ All admin routes require a session and check `getOwnedTournament`.
 | `POST .../courts` (`phase`: `POOL`/`ELIMINATION`), `DELETE .../courts/[courtId]` | Courts. Add is 409 for POOL once pool matches exist, for ELIMINATION once the bracket exists; delete blocked once matches use the court |
 | `POST .../setup-groups` | Create groups/teams from player count (409 if already done) |
 | `PATCH .../teams` | Bulk save player names |
+| `PATCH .../advancing` | Change teams advancing (validated like setup; 409 once the bracket exists) |
 | `POST .../generate-matches` | Build pool schedule (409 if matches exist) |
 | `PATCH .../matches/[matchId]` | Save score; triggers bracket advancement |
 | `POST .../generate-bracket` | First knockout stage (needs all pool matches done) |
