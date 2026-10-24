@@ -97,11 +97,11 @@ architecture, decisions, operations runbook and known gotchas.
   pairing consecutive winners in bracket order (`src/lib/bracket-progress.ts`)
   — no extra admin action needed between rounds. When the Semifinal completes,
   it generates *both* the Final (winners) and a 3rd Place match (the two
-  semifinal losers play each other). When the Final completes, the
-  tournament is marked `COMPLETED` and the champion (and 3rd place, once
-  that match is also done) is shown on both the admin and public pages.
-  The 3rd Place match doesn't gate tournament completion — only the Final
-  does.
+  semifinal losers play each other), on different courts when there are
+  several so they can be played at the same time. The champion and 3rd
+  place are shown on the admin and public pages as soon as each match is
+  done, and the tournament is marked `COMPLETED` only once **both** the
+  Final and the 3rd Place match have been played.
 - Player names: once groups exist, the admin can enter each team's two
   player names (optional, editable any time). Once set, they show up
   anywhere a team label appears on the public page and in the admin match

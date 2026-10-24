@@ -30,11 +30,12 @@ export async function createStageMatches(
 /**
  * Call after a knockout match is marked COMPLETED. If every match in that
  * match's stage is now complete:
- * - Final complete -> tournament marked COMPLETED.
- * - Third Place complete -> nothing further (doesn't gate completion; the
- *   Final decides that independently).
+ * - Final or Third Place complete -> tournament marked COMPLETED once both
+ *   have been played (when there is no Third Place match, i.e. a 2-team
+ *   bracket, the Final alone ends it).
  * - Semifinal complete -> generates both the Final (winners) and the Third
- *   Place match (losers of each semifinal play each other).
+ *   Place match (losers of each semifinal play each other), on different
+ *   courts when there is more than one so they can run at the same time.
  * - Any earlier stage complete -> generates the next stage (winners only).
  */
 export async function advanceBracketIfStageComplete(
@@ -50,15 +51,23 @@ export async function advanceBracketIfStageComplete(
   if (stageMatches.length === 0) return;
   if (!stageMatches.every((m) => m.status === "COMPLETED")) return;
 
-  if (stage === "FINAL") {
-    await tx.tournament.update({
-      where: { id: tournamentId },
-      data: { status: "COMPLETED" },
+  if (stage === "FINAL" || stage === "THIRD_PLACE") {
+    // The tournament ends only when both the Final and the Third Place match
+    // are done. Both are created together when the semifinals finish, so
+    // anything still open here means we keep waiting.
+    const unfinished = await tx.match.count({
+      where: {
+        tournamentId,
+        stage: { in: ["FINAL", "THIRD_PLACE"] },
+        status: { not: "COMPLETED" },
+      },
     });
-    return;
-  }
-
-  if (stage === "THIRD_PLACE") {
+    if (unfinished === 0) {
+      await tx.tournament.update({
+        where: { id: tournamentId },
+        data: { status: "COMPLETED" },
+      });
+    }
     return;
   }
 
@@ -97,12 +106,15 @@ export async function advanceBracketIfStageComplete(
       where: { tournamentId, stage: "THIRD_PLACE" },
     });
     if (alreadyGeneratedThirdPlace === 0) {
+      // Start from the second court so it doesn't share the Final's court
+      // (the Final takes the first); with a single court they share it.
+      const thirdPlaceCourtIds = [...courtIds.slice(1), courtIds[0]];
       await createStageMatches(
         tx,
         tournamentId,
         "THIRD_PLACE",
         [[losers[0], losers[1]]],
-        courtIds
+        thirdPlaceCourtIds
       );
     }
   }

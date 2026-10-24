@@ -156,8 +156,11 @@ points scored. There is **no head-to-head tiebreak** (by decision). Only
   knockout result save. When a stage's matches are all complete it pairs
   *consecutive winners by `bracketPosition`* into the next stage.
 - Semifinal completion creates **both** the Final and the **3rd Place** match
-  (losers). Completing the Final sets the tournament `COMPLETED`. Completing 3rd
-  Place does not (only the Final decides the champion).
+  (losers), the Final on the first elimination court and 3rd Place on the second
+  (the same one if there is only one court), so they can run at the same time.
+  The tournament becomes `COMPLETED` only when *both* are done, in either order
+  (a 2-team bracket has no 3rd Place match, so the Final alone ends it). The
+  champion / 3rd place banners follow the match results, not the status.
 
 ### Player allocation + seeding (`randomizePairing.ts`, runs in the browser; the UI button is "Allocate Players")
 Roster must match the team count exactly, and **roster order matters**: earliest
