@@ -142,7 +142,8 @@ points scored. There is **no head-to-head tiebreak** (by decision). Only
 
 ### Knockout bracket (`bracket.ts`, `bracket-progress.ts`)
 - Teams advancing is chosen at group setup (`setup-groups`) and can be changed
-  until the bracket exists (`PATCH .../advancing`, `AdvancingPanel`), validated against
+  until the bracket exists (`PATCH .../advancing`, `AdvancingPanel`; the standings tables bold the top k rows, with
+  k = advancingTeams / groups, via `advancingPerGroup` in the public payload), validated against
   `advancingOptions(groupSizes)` in `advancing.ts`: a power of 2, >= 2, <= 16,
   and each group sends fewer teams than its smallest group. Because the group
   count is also a power of 2 this is always the same k teams per group, so no

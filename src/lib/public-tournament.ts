@@ -47,6 +47,8 @@ export type PublicTournamentData = {
   };
   rounds: PublicRound[];
   groups: PublicGroupStanding[];
+  /** How many teams from each group go through to the elimination round. */
+  advancingPerGroup: number;
 };
 
 export async function getPublicTournamentData(
@@ -156,5 +158,10 @@ export async function getPublicTournamentData(
     },
     rounds,
     groups: groupStandings,
+    // Older tournaments (no saved value) advance the top 2 from each group.
+    advancingPerGroup:
+      groups.length > 0
+        ? (tournament.advancingTeams ?? groups.length * 2) / groups.length
+        : 0,
   };
 }

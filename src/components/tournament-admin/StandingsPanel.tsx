@@ -9,10 +9,15 @@ import type { AdminGroup, AdminMatch } from "./types";
 export function StandingsPanel({
   groups,
   matches,
+  advancingTeams,
 }: {
   groups: AdminGroup[];
   matches: AdminMatch[];
+  /** Teams that make the bracket; null = top 2 per group (older tournaments). */
+  advancingTeams: number | null;
 }) {
+  const advancingPerGroup =
+    groups.length > 0 ? (advancingTeams ?? groups.length * 2) / groups.length : 0;
   const standingsByGroup = useMemo(() => {
     return groups.map((g) => {
       const teamById = new Map(g.teams.map((t) => [t.id, t]));
@@ -69,7 +74,11 @@ export function StandingsPanel({
                 {rows.map((r, i) => (
                   <tr
                     key={r.teamId}
-                    className={i < 2 ? "font-semibold text-navy-900" : "text-navy-500"}
+                    className={
+                      i < advancingPerGroup
+                        ? "font-semibold text-navy-900"
+                        : "text-navy-500"
+                    }
                   >
                     <td className="py-1 pr-3">{r.label}</td>
                     <td className="px-3 py-1 text-right">

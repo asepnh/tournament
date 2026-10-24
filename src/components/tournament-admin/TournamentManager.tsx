@@ -123,7 +123,11 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
         onChange={refresh}
       />
 
-      <StandingsPanel groups={data.groups} matches={data.matches} />
+      <StandingsPanel
+        groups={data.groups}
+        matches={data.matches}
+        advancingTeams={data.tournament.advancingTeams}
+      />
     </div>
   );
 }

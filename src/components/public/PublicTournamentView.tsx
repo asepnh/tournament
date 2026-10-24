@@ -88,7 +88,10 @@ export function PublicTournamentView({
         {tab === "results" ? (
           <MatchResultsView rounds={current.rounds} />
         ) : (
-          <GroupStandingsView groups={current.groups} />
+          <GroupStandingsView
+            groups={current.groups}
+            advancingPerGroup={current.advancingPerGroup}
+          />
         )}
       </div>
     </main>

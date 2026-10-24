@@ -86,6 +86,7 @@ architecture, decisions, operations runbook and known gotchas.
   works out to the same number of teams from every group (top 1, 2 or 4).
   Default is the top 2 per group. See `src/lib/advancing.ts`. It can be changed
   from the **Teams advancing** card at any time until the bracket is generated.
+  The group standings (public and admin) bold exactly the teams that qualify.
 - First-round seeding gives all group winners seeds 1..G, second place
   G+1..2G, and so on, then pairs seed s against seed N+1-s (see
   `seedFirstRound` in `src/lib/bracket.ts`), so no team can face an

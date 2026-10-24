@@ -2,8 +2,10 @@ import type { PublicGroupStanding } from "@/lib/public-tournament";
 
 export function GroupStandingsView({
   groups,
+  advancingPerGroup,
 }: {
   groups: PublicGroupStanding[];
+  advancingPerGroup: number;
 }) {
   if (groups.length === 0) {
     return (
@@ -36,7 +38,7 @@ export function GroupStandingsView({
                 <tr
                   key={s.teamLabel}
                   className={
-                    i < 2
+                    i < advancingPerGroup
                       ? "font-semibold text-navy-900"
                       : "text-navy-500"
                   }
