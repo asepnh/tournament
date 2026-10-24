@@ -44,6 +44,7 @@ export type PublicTournamentData = {
     description: string | null;
     slug: string;
     status: string;
+    format: "POOL_PLAY" | "KNOCKOUT_ONLY";
   };
   rounds: PublicRound[];
   groups: PublicGroupStanding[];
@@ -155,6 +156,7 @@ export async function getPublicTournamentData(
       description: tournament.description,
       slug: tournament.slug,
       status: tournament.status,
+      format: tournament.format,
     },
     rounds,
     groups: groupStandings,

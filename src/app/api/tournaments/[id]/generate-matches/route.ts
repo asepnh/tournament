@@ -20,6 +20,13 @@ export async function POST(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  if (tournament.format === "KNOCKOUT_ONLY") {
+    return NextResponse.json(
+      { error: "Knockout-only tournaments have no pool play schedule" },
+      { status: 400 }
+    );
+  }
+
   const existingMatchCount = await prisma.match.count({
     where: { tournamentId: id },
   });

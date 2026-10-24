@@ -3,7 +3,13 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getOwnedTournament } from "@/lib/authz";
 import { computeGroupStandings } from "@/lib/standings";
-import { isPowerOfTwo, seedFirstRound, stageForTeamCount } from "@/lib/bracket";
+import {
+  isPowerOfTwo,
+  seedFirstRound,
+  seedKnockoutBracket,
+  stageForTeamCount,
+} from "@/lib/bracket";
+import { sortTeamsBySeed } from "@/lib/knockout";
 import { createStageMatches } from "@/lib/bracket-progress";
 import { advancingOptions } from "@/lib/advancing";
 import { eliminationCourtIds } from "@/lib/courts";
@@ -31,6 +37,48 @@ export async function POST(
       { error: "The elimination bracket has already been generated" },
       { status: 409 }
     );
+  }
+
+  // Knockout-only: no groups or pool play, the teams go straight into the
+  // seeded bracket (T1 = seed 1).
+  if (tournament.format === "KNOCKOUT_ONLY") {
+    const [teams, courts] = await Promise.all([
+      prisma.team.findMany({ where: { tournamentId: id } }),
+      prisma.court.findMany({
+        where: { tournamentId: id },
+        orderBy: { createdAt: "asc" },
+      }),
+    ]);
+    if (teams.length === 0) {
+      return NextResponse.json(
+        { error: "Set up the bracket (number of teams) first" },
+        { status: 400 }
+      );
+    }
+    const knockoutCourtIds = eliminationCourtIds(courts);
+    if (knockoutCourtIds.length === 0) {
+      return NextResponse.json(
+        { error: "Add at least one court first" },
+        { status: 400 }
+      );
+    }
+
+    const seeded = sortTeamsBySeed(teams);
+    const knockoutPairs = seedKnockoutBracket(seeded.map((t) => t.id));
+    await prisma.$transaction(async (tx) => {
+      await createStageMatches(
+        tx,
+        id,
+        stageForTeamCount(seeded.length),
+        knockoutPairs,
+        knockoutCourtIds
+      );
+      await tx.tournament.update({
+        where: { id },
+        data: { status: "IN_PROGRESS" },
+      });
+    });
+    return NextResponse.json({ ok: true }, { status: 201 });
   }
 
   const [groups, poolMatches, courts] = await Promise.all([

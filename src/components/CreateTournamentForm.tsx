@@ -3,13 +3,14 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input, Label, Textarea } from "@/components/ui/Input";
+import { Input, Label, Select, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 
 export function CreateTournamentForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [format, setFormat] = useState<"POOL_PLAY" | "KNOCKOUT_ONLY">("POOL_PLAY");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +23,7 @@ export function CreateTournamentForm() {
       const res = await fetch("/api/tournaments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description }),
+        body: JSON.stringify({ name, description, format }),
       });
       const data = await res.json();
 
@@ -55,6 +56,19 @@ export function CreateTournamentForm() {
             onChange={(e) => setName(e.target.value)}
             placeholder="Summer Slam 2026"
           />
+        </div>
+        <div>
+          <Label htmlFor="format">Format</Label>
+          <Select
+            id="format"
+            value={format}
+            onChange={(e) =>
+              setFormat(e.target.value as "POOL_PLAY" | "KNOCKOUT_ONLY")
+            }
+          >
+            <option value="POOL_PLAY">Groups, then knockout</option>
+            <option value="KNOCKOUT_ONLY">Knockout only (no group stage)</option>
+          </Select>
         </div>
         <div>
           <Label htmlFor="description">Description (optional)</Label>

@@ -22,6 +22,13 @@ export async function PATCH(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  if (tournament.format === "KNOCKOUT_ONLY") {
+    return NextResponse.json(
+      { error: "Knockout-only tournaments have no group qualification" },
+      { status: 400 }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = updateAdvancingSchema.safeParse(body);
   if (!parsed.success) {

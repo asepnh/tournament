@@ -6,6 +6,7 @@ export type AdminTournament = {
   status: "SETUP" | "IN_PROGRESS" | "COMPLETED";
   playerCount: number | null;
   advancingTeams: number | null;
+  format: "POOL_PLAY" | "KNOCKOUT_ONLY";
 };
 
 export type CourtPhase = "POOL" | "ELIMINATION";
@@ -57,4 +58,6 @@ export type TournamentDetail = {
   courts: AdminCourt[];
   groups: AdminGroup[];
   matches: AdminMatch[];
+  /** Teams with no group (knockout-only tournaments), in seed order. */
+  teams: AdminTeam[];
 };

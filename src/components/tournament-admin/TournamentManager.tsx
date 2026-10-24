@@ -7,6 +7,7 @@ import { PublicLinkBanner } from "./PublicLinkBanner";
 import { CourtsPanel } from "./CourtsPanel";
 import { PlayerSetupPanel } from "./PlayerSetupPanel";
 import { AdvancingPanel } from "./AdvancingPanel";
+import { BracketSetupPanel } from "./BracketSetupPanel";
 import { PlayerNamesPanel } from "./PlayerNamesPanel";
 import { MatchesPanel } from "./MatchesPanel";
 import { StandingsPanel } from "./StandingsPanel";
@@ -47,6 +48,14 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
     }
   }
 
+  const knockoutOnly = data.tournament.format === "KNOCKOUT_ONLY";
+  // A knockout-only tournament's teams belong to no group; show them to the
+  // names panel as one ordered list.
+  const nameGroups = knockoutOnly
+    ? data.teams.length > 0
+      ? [{ id: "bracket", label: "Bracket", teams: data.teams }]
+      : []
+    : data.groups;
   const matchesGenerated = data.matches.length > 0;
   const bracketGenerated = data.matches.some((m) => m.stage !== "POOL");
   const finalMatch = data.matches.find(
@@ -91,26 +100,38 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
         courts={data.courts}
         poolLocked={matchesGenerated}
         eliminationLocked={bracketGenerated}
+        knockoutOnly={knockoutOnly}
         onChange={refresh}
       />
 
-      <PlayerSetupPanel
-        tournamentId={data.tournament.id}
-        groups={data.groups}
-        onChange={refresh}
-      />
+      {knockoutOnly ? (
+        <BracketSetupPanel
+          tournamentId={data.tournament.id}
+          hasTeams={data.teams.length > 0}
+          onChange={refresh}
+        />
+      ) : (
+        <>
+          <PlayerSetupPanel
+            tournamentId={data.tournament.id}
+            groups={data.groups}
+            onChange={refresh}
+          />
 
-      <AdvancingPanel
-        tournamentId={data.tournament.id}
-        groups={data.groups}
-        advancingTeams={data.tournament.advancingTeams}
-        locked={bracketGenerated}
-        onChange={refresh}
-      />
+          <AdvancingPanel
+            tournamentId={data.tournament.id}
+            groups={data.groups}
+            advancingTeams={data.tournament.advancingTeams}
+            locked={bracketGenerated}
+            onChange={refresh}
+          />
+        </>
+      )}
 
       <PlayerNamesPanel
         tournamentId={data.tournament.id}
-        groups={data.groups}
+        groups={nameGroups}
+        knockoutOnly={knockoutOnly}
         onChange={refresh}
       />
 
@@ -120,14 +141,18 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
         groups={data.groups}
         courts={data.courts}
         advancingTeams={data.tournament.advancingTeams}
+        knockoutOnly={knockoutOnly}
+        teamCount={data.teams.length}
         onChange={refresh}
       />
 
-      <StandingsPanel
-        groups={data.groups}
-        matches={data.matches}
-        advancingTeams={data.tournament.advancingTeams}
-      />
+      {!knockoutOnly && (
+        <StandingsPanel
+          groups={data.groups}
+          matches={data.matches}
+          advancingTeams={data.tournament.advancingTeams}
+        />
+      )}
     </div>
   );
 }

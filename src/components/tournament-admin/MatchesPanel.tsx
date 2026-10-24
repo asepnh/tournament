@@ -13,6 +13,8 @@ export function MatchesPanel({
   groups,
   courts,
   advancingTeams,
+  knockoutOnly = false,
+  teamCount = 0,
   onChange,
 }: {
   tournamentId: string;
@@ -21,6 +23,10 @@ export function MatchesPanel({
   courts: AdminCourt[];
   /** Teams that make the bracket; null = top 2 per group (older tournaments). */
   advancingTeams: number | null;
+  /** Knockout-only: no pool play, the bracket is generated straight away. */
+  knockoutOnly?: boolean;
+  /** Teams in a knockout-only bracket. */
+  teamCount?: number;
   onChange: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +101,29 @@ export function MatchesPanel({
     } finally {
       setBracketLoading(false);
     }
+  }
+
+  if (matches.length === 0 && knockoutOnly) {
+    const canGenerateKnockout = teamCount > 0 && courts.length > 0;
+    return (
+      <Card>
+        <h2 className="mb-2 text-lg font-semibold text-navy-900">Matches</h2>
+        <p className="mb-4 text-sm text-navy-600">
+          {canGenerateKnockout
+            ? `Generate the ${teamCount}-team bracket. Seed 1 plays the lowest seed, 2 plays the second lowest, and so on.`
+            : "Add courts and set up the bracket first, then generate it."}
+        </p>
+        <Button
+          onClick={handleGenerateBracket}
+          disabled={!canGenerateKnockout || bracketLoading}
+        >
+          {bracketLoading ? "Generating..." : "Generate elimination bracket"}
+        </Button>
+        {bracketError && (
+          <p className="mt-2 text-sm text-red-600">{bracketError}</p>
+        )}
+      </Card>
+    );
   }
 
   if (matches.length === 0) {

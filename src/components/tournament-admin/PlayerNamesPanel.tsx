@@ -43,10 +43,14 @@ function parseLines(text: string): string[] {
 export function PlayerNamesPanel({
   tournamentId,
   groups,
+  knockoutOnly = false,
   onChange,
 }: {
   tournamentId: string;
+  /** For a knockout-only tournament, pass the teams as one pseudo-group. */
   groups: AdminGroup[];
+  /** Teams are bracket seeds (T1 = seed 1) instead of members of groups. */
+  knockoutOnly?: boolean;
   onChange: () => void;
 }) {
   const orderedTeams = groups.flatMap((g) => g.teams);
@@ -178,7 +182,7 @@ export function PlayerNamesPanel({
         </p>
         <p className="mb-2 text-sm text-navy-600">
           Paste or type all {expectedCount} players, one name per line, then
-          pair them into teams and assign them across the groups. List the
+          pair them into teams and assign them {knockoutOnly ? "to the bracket" : "across the groups"}. List the
           stronger players first: seeds are partnered with players from the
           top of this list, and everyone else is random. Clicking again
           re-shuffles.
@@ -201,9 +205,11 @@ export function PlayerNamesPanel({
             List names from the roster above, one per line, in priority
             order (first = seed 1). Each seed gets a team of their own and
             is never paired with another seed.
-            {groups.length === 4
-              ? " With 4 groups, seeds 1-4 go in the first team row, 5-8 in the second (in reverse group order), and so on, so the groups stay balanced."
-              : " Seeds are spread across the groups in turn."}{" "}
+            {knockoutOnly
+              ? " Seeds take the top bracket spots: seed 1 is T1, seed 2 is T2, and so on, so the best seeds meet the lowest seeds in round 1."
+              : groups.length === 4
+                ? " With 4 groups, seeds 1-4 go in the first team row, 5-8 in the second (in reverse group order), and so on, so the groups stay balanced."
+                : " Seeds are spread across the groups in turn."}{" "}
             Each seed&apos;s partner is picked at random from the next{" "}
             {seedCount || "N"} unseeded names at the top of the roster.
           </p>
@@ -228,7 +234,9 @@ export function PlayerNamesPanel({
       <div className="flex flex-col gap-6">
         {groups.map((g) => (
           <div key={g.id}>
-            <p className="mb-2 font-semibold text-navy-900">Group {g.label}</p>
+            <p className="mb-2 font-semibold text-navy-900">
+              {knockoutOnly ? "Teams (in bracket seed order)" : `Group ${g.label}`}
+            </p>
             <div className="grid grid-cols-[3.5rem_1fr_1fr] items-center gap-x-3 gap-y-2">
               {g.teams.map((t) => (
                 <Fragment key={t.id}>

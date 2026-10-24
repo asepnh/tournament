@@ -124,3 +124,25 @@ export function seedFirstRound(
   }
   return pairs;
 }
+
+/**
+ * First-round pairings for a knockout-only tournament: teams in seed order
+ * (best first) go straight into the standard seeded bracket, so seed 1 plays
+ * the last seed, 2 plays the second to last, and so on, and the top seeds
+ * stay apart as long as possible. The team count must be a power of 2.
+ */
+export function seedKnockoutBracket(teamIdsInSeedOrder: string[]): [string, string][] {
+  const n = teamIdsInSeedOrder.length;
+  if (n < 2 || !isPowerOfTwo(n)) {
+    throw new Error(`Knockout bracket needs a power-of-2 number of teams, got ${n}`);
+  }
+  const order = seedOrder(n);
+  const pairs: [string, string][] = [];
+  for (let i = 0; i < order.length; i += 2) {
+    pairs.push([
+      teamIdsInSeedOrder[order[i] - 1],
+      teamIdsInSeedOrder[order[i + 1] - 1],
+    ]);
+  }
+  return pairs;
+}

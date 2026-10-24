@@ -30,7 +30,10 @@ export async function POST(
 
   // Group stage courts lock once the pool schedule exists; elimination
   // courts stay editable until the bracket has been generated.
-  const { name, phase } = parsed.data;
+  const { name } = parsed.data;
+  // A knockout-only tournament only has elimination courts.
+  const phase =
+    tournament.format === "KNOCKOUT_ONLY" ? "ELIMINATION" : parsed.data.phase;
   const lockedStage =
     phase === "POOL" ? { stage: "POOL" as const } : { stage: { not: "POOL" as const } };
   const lockedMatches = await prisma.match.count({

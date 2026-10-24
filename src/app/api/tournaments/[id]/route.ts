@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getOwnedTournament } from "@/lib/authz";
+import { sortTeamsBySeed } from "@/lib/knockout";
 
 export async function GET(
   _request: Request,
@@ -18,7 +19,7 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const [courts, groups, matches] = await Promise.all([
+  const [courts, groups, matches, teams] = await Promise.all([
     prisma.court.findMany({
       where: { tournamentId: id },
       orderBy: { createdAt: "asc" },
@@ -33,9 +34,17 @@ export async function GET(
       orderBy: [{ stage: "asc" }, { round: "asc" }, { court: { name: "asc" } }],
       include: { teamA: true, teamB: true, court: true, winner: true },
     }),
+    // Teams of a knockout-only tournament belong to no group.
+    prisma.team.findMany({ where: { tournamentId: id, groupId: null } }),
   ]);
 
-  return NextResponse.json({ tournament, courts, groups, matches });
+  return NextResponse.json({
+    tournament,
+    courts,
+    groups,
+    matches,
+    teams: sortTeamsBySeed(teams),
+  });
 }
 
 export async function DELETE(

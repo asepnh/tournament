@@ -46,6 +46,7 @@ export default async function DashboardPage() {
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h2 className="font-semibold text-navy-900">{t.name}</h2>
                   <span className="whitespace-nowrap rounded-full bg-navy-100 px-2 py-0.5 text-xs font-medium text-navy-700">
+                    {t.format === "KNOCKOUT_ONLY" ? "Knockout · " : ""}
                     {STATUS_LABEL[t.status] ?? t.status}
                   </span>
                 </div>

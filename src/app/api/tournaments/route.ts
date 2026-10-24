@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       name: parsed.data.name,
       description: parsed.data.description || null,
       slug,
+      format: parsed.data.format,
       ownerId: session.user.id,
     },
   });

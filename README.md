@@ -132,6 +132,26 @@ architecture, decisions, operations runbook and known gotchas.
   ephemeral — it's only used at the moment Allocate Players is clicked,
   not saved anywhere, so re-allocating later means re-listing the seeds.
 
+### Knockout-only tournaments
+
+When creating a tournament the admin picks a format: **Groups, then knockout**
+(everything above, the default) or **Knockout only**, which skips groups and
+pool play entirely.
+
+- The admin adds courts (one list, used for the knockout rounds), then chooses
+  the number of teams: 2, 4, 8 or 16 (the bracket has no byes). Teams are
+  labeled T1..Tn, where the number is the bracket seed.
+- The roster / **Allocate Players** panel works as usual. Seeds take the top
+  spots (seed 1 = T1, seed 2 = T2, ...), seeds never partner each other, and
+  each seed's partner comes from the top of the roster; everyone else is
+  shuffled into the remaining teams.
+- **Generate elimination bracket** is available straight away. Round 1 uses the
+  standard seeded pairing (T1 v last, T2 v second to last, ...); after that the
+  bracket, 3rd place match and completion work exactly as above.
+- The public page shows only the bracket (no Group Standings tab).
+
+Existing tournaments are unaffected: the format defaults to groups-then-knockout.
+
 ### Super admin
 
 One or more accounts can be marked super admin (a database flag, set by hand —

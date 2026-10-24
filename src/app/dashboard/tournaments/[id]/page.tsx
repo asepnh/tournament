@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getOwnedTournament } from "@/lib/authz";
+import { sortTeamsBySeed } from "@/lib/knockout";
 import { DashboardNav } from "@/components/DashboardNav";
 import { TournamentManager } from "@/components/tournament-admin/TournamentManager";
 
@@ -21,7 +22,7 @@ export default async function TournamentAdminPage({
     notFound();
   }
 
-  const [courts, groups, matches] = await Promise.all([
+  const [courts, groups, matches, teams] = await Promise.all([
     prisma.court.findMany({
       where: { tournamentId: id },
       orderBy: { createdAt: "asc" },
@@ -36,6 +37,7 @@ export default async function TournamentAdminPage({
       orderBy: [{ stage: "asc" }, { round: "asc" }, { court: { name: "asc" } }],
       include: { teamA: true, teamB: true, court: true, winner: true },
     }),
+    prisma.team.findMany({ where: { tournamentId: id, groupId: null } }),
   ]);
 
   return (
@@ -43,7 +45,13 @@ export default async function TournamentAdminPage({
       <DashboardNav userName={session.user.name} />
       <main className="mx-auto max-w-4xl px-4 py-8">
         <TournamentManager
-          initial={{ tournament, courts, groups, matches }}
+          initial={{
+            tournament,
+            courts,
+            groups,
+            matches,
+            teams: sortTeamsBySeed(teams),
+          }}
         />
       </main>
     </div>

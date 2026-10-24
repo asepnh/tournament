@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidKnockoutTeamCount, KNOCKOUT_TEAM_COUNTS } from "@/lib/knockout";
 
 export const registerSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -9,6 +10,17 @@ export const registerSchema = z.object({
 export const createTournamentSchema = z.object({
   name: z.string().trim().min(1, "Tournament name is required").max(120),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
+  // "Groups, then knockout" (default) or straight into a knockout bracket.
+  format: z.enum(["POOL_PLAY", "KNOCKOUT_ONLY"]).default("POOL_PLAY"),
+});
+
+export const setupBracketSchema = z.object({
+  teamCount: z
+    .number()
+    .int()
+    .refine(isValidKnockoutTeamCount, {
+      message: `Number of teams must be one of: ${KNOCKOUT_TEAM_COUNTS.join(", ")}`,
+    }),
 });
 
 export const addCourtSchema = z.object({

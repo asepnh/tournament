@@ -30,6 +30,7 @@ export function PublicTournamentView({
 
   const [tab, setTab] = useState<"results" | "standings">("results");
   const current = data ?? initial;
+  const knockoutOnly = current.tournament.format === "KNOCKOUT_ONLY";
 
   const finalMatch = current.rounds
     .find((r) => r.stage === "FINAL")
@@ -75,17 +76,20 @@ export function PublicTournamentView({
         )}
       </header>
 
-      <Tabs
-        tabs={[
-          { id: "results", label: "Match Results" },
-          { id: "standings", label: "Group Standings" },
-        ]}
-        active={tab}
-        onChange={(id) => setTab(id as "results" | "standings")}
-      />
+      {/* A knockout-only tournament has no groups, so only the results show. */}
+      {!knockoutOnly && (
+        <Tabs
+          tabs={[
+            { id: "results", label: "Match Results" },
+            { id: "standings", label: "Group Standings" },
+          ]}
+          active={tab}
+          onChange={(id) => setTab(id as "results" | "standings")}
+        />
+      )}
 
       <div className="mt-4">
-        {tab === "results" ? (
+        {knockoutOnly || tab === "results" ? (
           <MatchResultsView rounds={current.rounds} />
         ) : (
           <GroupStandingsView

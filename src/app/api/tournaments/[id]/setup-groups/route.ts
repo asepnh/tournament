@@ -22,6 +22,13 @@ export async function POST(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  if (tournament.format === "KNOCKOUT_ONLY") {
+    return NextResponse.json(
+      { error: "Knockout-only tournaments have no groups — set up the bracket instead" },
+      { status: 400 }
+    );
+  }
+
   const existingGroupCount = await prisma.group.count({
     where: { tournamentId: id },
   });

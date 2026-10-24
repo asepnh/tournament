@@ -128,10 +128,13 @@ export function CourtsPanel({
   courts,
   poolLocked,
   eliminationLocked,
+  knockoutOnly = false,
   onChange,
 }: {
   tournamentId: string;
   courts: AdminCourt[];
+  /** Knockout-only tournaments have a single list of courts. */
+  knockoutOnly?: boolean;
   /** Pool matches exist, so group stage courts can't change. */
   poolLocked: boolean;
   /** The bracket exists, so elimination courts can't change. */
@@ -157,6 +160,24 @@ export function CourtsPanel({
     } finally {
       setCopying(false);
     }
+  }
+
+  if (knockoutOnly) {
+    return (
+      <Card>
+        <h2 className="mb-4 text-lg font-semibold text-navy-900">Courts</h2>
+        <CourtList
+          tournamentId={tournamentId}
+          title="Courts"
+          hint="Used for the knockout rounds."
+          phase="ELIMINATION"
+          courts={eliminationCourts}
+          locked={eliminationLocked}
+          lockedText="Locked once the bracket has been generated."
+          onChange={onChange}
+        />
+      </Card>
+    );
   }
 
   return (

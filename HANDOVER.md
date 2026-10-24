@@ -65,7 +65,18 @@ SWR · zod. Exact versions are in `package.json`.
 5. Generate pool matches (round robin inside each group, spread over courts).
 6. Enter scores. Standings recompute live.
 7. When all pool matches are done, **Generate elimination bracket**. After that
-   everything advances automatically; the Final completes the tournament.
+   everything advances automatically; the Final and 3rd Place complete the tournament.
+
+**Knockout-only variant** (`Tournament.format = KNOCKOUT_ONLY`, chosen at creation):
+steps 3, 5 and 6 are replaced by `setup-bracket` (2/4/8/16 teams, labeled `T1..Tn`
+= bracket seed, `Team.groupId = null`); the roster/seeding panel assigns seeds to
+`T1..` in order (it reuses `randomizePairing` with a single "group" of all teams,
+which places seed k on team k); **Generate elimination bracket** then seeds the
+teams with `seedKnockoutBracket` (`bracket.ts`) and everything after is shared.
+All of this is gated on `format`, so pool tournaments take the old paths unchanged;
+`setup-groups`, `generate-matches` and `advancing` reject knockout-only tournaments.
+Courts of a knockout-only tournament are forced to `ELIMINATION`. No byes, max 16
+teams (Round of 16).
 
 **Vocabulary that matters:**
 
@@ -98,7 +109,9 @@ Migrations so far: `init`, `add_bracket_position`, `add_third_place_stage`,
 `add_advancing_teams` (`Tournament.advancingTeams`, nullable: null on older
 tournaments means top 2 per group), `add_user_super_admin` (`User.isSuperAdmin`,
 default false), `add_court_phase` (`Court.phase`, default `POOL`; courts used for the
-bracket are the `ELIMINATION` ones, else all courts — see `src/lib/courts.ts`).
+bracket are the `ELIMINATION` ones, else all courts — see `src/lib/courts.ts`),
+`add_knockout_only_format` (`TournamentFormat.KNOCKOUT_ONLY` + `Team.groupId` now
+nullable; existing rows are untouched).
 The player-count rewrite, player names, allocation and seeding needed **no**
 migrations (`Team.player1Name/player2Name` existed from day one).
 
@@ -202,6 +215,7 @@ All admin routes require a session and check `getOwnedTournament`.
 | `POST .../courts` (`phase`: `POOL`/`ELIMINATION`), `DELETE .../courts/[courtId]` | Courts. Add is 409 for POOL once pool matches exist, for ELIMINATION once the bracket exists; delete blocked once matches use the court |
 | `POST .../setup-groups` | Create groups/teams from player count (409 if already done) |
 | `PATCH .../teams` | Bulk save player names |
+| `POST .../setup-bracket` | Knockout-only: create teams `T1..Tn` (n = 2/4/8/16; 409 if already done) |
 | `PATCH .../advancing` | Change teams advancing (validated like setup; 409 once the bracket exists) |
 | `POST .../generate-matches` | Build pool schedule (409 if matches exist) |
 | `PATCH .../matches/[matchId]` | Save score; triggers bracket advancement |
