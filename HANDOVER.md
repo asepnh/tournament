@@ -68,8 +68,11 @@ SWR · zod. Exact versions are in `package.json`.
    everything advances automatically; the Final and 3rd Place complete the tournament.
 
 **Knockout-only variant** (`Tournament.format = KNOCKOUT_ONLY`, chosen at creation):
-steps 3, 5 and 6 are replaced by `setup-bracket` (2/4/8/16 teams, labeled `T1..Tn`
-= bracket seed, `Team.groupId = null`); the roster/seeding panel assigns seeds to
+steps 3, 5 and 6 are replaced by `setup-bracket` (any 2-16 teams, labeled `T1..Tn`
+= bracket seed, `Team.groupId = null`). The Bracket card (`BracketSetupPanel`) is an empty
+number field that stays editable (`Update teams`) until the matches are generated;
+the route resizes the team list, and the names panel is remounted (keyed on the
+team count) so its state follows; the roster/seeding panel assigns seeds to
 `T1..` in order (it reuses `randomizePairing` with a single "group" of all teams,
 which places seed k on team k); **Generate elimination bracket** then seeds the
 teams with `buildKnockoutFirstRound` (`bracket.ts`) and everything after is shared.
@@ -227,7 +230,7 @@ All admin routes require a session and check `getOwnedTournament`.
 | `POST .../courts` (`phase`: `POOL`/`ELIMINATION`), `DELETE .../courts/[courtId]` | Courts. Add is 409 for POOL once pool matches exist, for ELIMINATION once the bracket exists; delete blocked once matches use the court |
 | `POST .../setup-groups` | Create groups/teams from player count (409 if already done) |
 | `PATCH .../teams` | Bulk save player names |
-| `POST .../setup-bracket` | Knockout-only: create teams `T1..Tn` (n = 2/4/8/16; 409 if already done) |
+| `POST .../setup-bracket` | Knockout-only: set the number of teams (2-16): creates `T1..Tn`, or removes the highest seeds if lowered; returns the team ids; 409 once the bracket is generated |
 | `PATCH .../pairings` | Re-pair a knockout round (`ROUND_OF_16`/`QUARTERFINAL`/`SEMIFINAL`): same matches, same teams each once; 409 once any match in the round has a result or a later round exists |
 | `PATCH .../advancing` | Change teams advancing (validated like setup; 409 once the bracket exists) |
 | `POST .../generate-matches` | Build pool schedule (409 if matches exist) |

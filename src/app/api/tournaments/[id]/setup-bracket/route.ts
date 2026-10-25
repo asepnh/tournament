@@ -3,10 +3,12 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getOwnedTournament } from "@/lib/authz";
 import { setupBracketSchema } from "@/lib/validation";
-import { knockoutTeamLabel } from "@/lib/knockout";
+import { knockoutTeamLabel, sortTeamsBySeed } from "@/lib/knockout";
 
-// Creates the teams (T1..Tn, numbered by bracket seed) for a knockout-only
-// tournament. These tournaments have no groups.
+// Sets the number of teams (T1..Tn, numbered by bracket seed) of a
+// knockout-only tournament, creating or removing teams at the end as needed.
+// These tournaments have no groups. The count can change any time until the
+// bracket has been generated; the admin UI derives it from the roster size.
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -28,12 +30,12 @@ export async function POST(
     );
   }
 
-  const existing = await prisma.team.count({ where: { tournamentId: id } });
-  if (existing > 0) {
+  const matchCount = await prisma.match.count({ where: { tournamentId: id } });
+  if (matchCount > 0) {
     return NextResponse.json(
       {
         error:
-          "The bracket has already been set up. Delete the tournament and start over to change the number of teams.",
+          "The bracket has already been generated, so the number of teams can't change any more.",
       },
       { status: 409 }
     );
@@ -49,18 +51,36 @@ export async function POST(
   }
 
   const { teamCount } = parsed.data;
+  const existing = sortTeamsBySeed(
+    await prisma.team.findMany({ where: { tournamentId: id } })
+  );
+
   await prisma.$transaction([
     prisma.tournament.update({
       where: { id },
       data: { playerCount: teamCount * 2 },
     }),
+    // More teams: add T(existing+1)..Tn. Fewer: drop the highest seeds. No
+    // matches exist yet, so nothing references the removed teams.
     prisma.team.createMany({
-      data: Array.from({ length: teamCount }, (_, i) => ({
-        label: knockoutTeamLabel(i + 1),
-        tournamentId: id,
-      })),
+      data: Array.from(
+        { length: Math.max(0, teamCount - existing.length) },
+        (_, i) => ({
+          label: knockoutTeamLabel(existing.length + i + 1),
+          tournamentId: id,
+        })
+      ),
+    }),
+    prisma.team.deleteMany({
+      where: { id: { in: existing.slice(teamCount).map((t) => t.id) } },
     }),
   ]);
 
-  return NextResponse.json({ ok: true }, { status: 201 });
+  const teams = sortTeamsBySeed(
+    await prisma.team.findMany({ where: { tournamentId: id } })
+  );
+  return NextResponse.json({
+    ok: true,
+    teams: teams.map((t) => ({ id: t.id, label: t.label })),
+  });
 }

@@ -115,8 +115,11 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
 
       {knockoutOnly ? (
         <BracketSetupPanel
+          // Remount when the team list changes so the field shows the new count.
+          key={data.teams.length}
           tournamentId={data.tournament.id}
-          hasTeams={data.teams.length > 0}
+          teams={data.teams}
+          locked={bracketGenerated}
           onChange={refresh}
         />
       ) : (
@@ -138,6 +141,7 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
       )}
 
       <PlayerNamesPanel
+        key={knockoutOnly ? `names-${data.teams.length}` : "names"}
         tournamentId={data.tournament.id}
         groups={nameGroups}
         knockoutOnly={knockoutOnly}
