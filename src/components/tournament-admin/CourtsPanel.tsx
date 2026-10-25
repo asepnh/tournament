@@ -42,6 +42,36 @@ function CourtList({
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Renaming works at any time, even when adding/removing is locked.
+  const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
+
+  async function handleRename(e: FormEvent) {
+    e.preventDefault();
+    if (!renaming) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/tournaments/${tournamentId}/courts/${renaming.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: renaming.name }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Something went wrong");
+        return;
+      }
+      setRenaming(null);
+      onChange();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault();
@@ -79,12 +109,55 @@ function CourtList({
 
       {courts.length > 0 && (
         <ul className="mb-3 flex flex-wrap gap-2">
-          {courts.map((c) => (
+          {courts.map((c) =>
+            renaming?.id === c.id ? (
+              <li key={c.id} className="w-full sm:w-auto">
+                <form onSubmit={handleRename} className="flex items-center gap-2">
+                  <Input
+                    autoFocus
+                    required
+                    maxLength={60}
+                    aria-label={`New name for ${c.name}`}
+                    value={renaming.name}
+                    onChange={(e) =>
+                      setRenaming({ id: c.id, name: e.target.value })
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setRenaming(null);
+                    }}
+                    className="w-44"
+                  />
+                  <Button type="submit" disabled={loading} className="shrink-0">
+                    Save
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setRenaming(null)}
+                    disabled={loading}
+                    className="shrink-0"
+                  >
+                    Cancel
+                  </Button>
+                </form>
+              </li>
+            ) : (
             <li
               key={c.id}
               className="flex items-center gap-2 rounded-full bg-navy-100 px-3 py-1 text-sm text-navy-700"
             >
               {c.name}
+              <button
+                type="button"
+                onClick={() => {
+                  setError(null);
+                  setRenaming({ id: c.id, name: c.name });
+                }}
+                className="text-navy-400 underline hover:text-navy-900"
+                aria-label={`Rename ${c.name}`}
+              >
+                Edit
+              </button>
               {!locked && (
                 <button
                   type="button"
@@ -96,7 +169,8 @@ function CourtList({
                 </button>
               )}
             </li>
-          ))}
+            )
+          )}
         </ul>
       )}
 

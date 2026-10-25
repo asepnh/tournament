@@ -27,6 +27,10 @@ export const setupBracketSchema = z.object({
     }),
 });
 
+export const renameCourtSchema = z.object({
+  name: z.string().trim().min(1, "Court name is required").max(60),
+});
+
 export const addCourtSchema = z.object({
   name: z.string().trim().min(1, "Court name is required").max(60),
   // Group stage vs elimination round; omitted = group stage.
