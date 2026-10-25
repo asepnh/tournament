@@ -103,6 +103,12 @@ architecture, decisions, operations runbook and known gotchas.
   place are shown on the admin and public pages as soon as each match is
   done, and the tournament is marked `COMPLETED` only once **both** the
   Final and the 3rd Place match have been played.
+- **Manual re-pairing:** until any match in a knockout round has a result, the
+  admin can click **Edit pairings** on that round (Round of 16, Quarterfinal or
+  Semifinal) and choose who meets who. Every team must be used exactly once, and
+  a warning shows if two teams from the same group are paired. The round locks as
+  soon as one of its matches has a result; the Final and 3rd Place match are not
+  editable because the results decide them.
 - Player names: once groups exist, the admin can enter each team's two
   player names (optional, editable any time). Once set, they show up
   anywhere a team label appears on the public page and in the admin match

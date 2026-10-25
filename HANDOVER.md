@@ -174,6 +174,10 @@ points scored. There is **no head-to-head tiebreak** (by decision). Only
   and so on (each in group order); pair with the standard seeded-bracket order
   (`seedOrder`). With an even G this guarantees **round 1 never rematches two
   teams from the same group**. Later rounds can reunite group-mates (same as real tournaments).
+- **Manual re-pairing** (`pairings.ts`, `PATCH .../pairings`, `EditPairingsForm`): only swaps
+  the `teamAId/teamBId` of matches in a round that has no results yet. Later rounds
+  don't exist at that point (they're built from results), so nothing else needs fixing.
+  The Final and 3rd Place are deliberately not editable.
 - `advanceBracketIfStageComplete` runs inside the same transaction as every
   knockout result save. When a stage's matches are all complete it pairs
   *consecutive winners by `bracketPosition`* into the next stage.
@@ -224,6 +228,7 @@ All admin routes require a session and check `getOwnedTournament`.
 | `POST .../setup-groups` | Create groups/teams from player count (409 if already done) |
 | `PATCH .../teams` | Bulk save player names |
 | `POST .../setup-bracket` | Knockout-only: create teams `T1..Tn` (n = 2/4/8/16; 409 if already done) |
+| `PATCH .../pairings` | Re-pair a knockout round (`ROUND_OF_16`/`QUARTERFINAL`/`SEMIFINAL`): same matches, same teams each once; 409 once any match in the round has a result or a later round exists |
 | `PATCH .../advancing` | Change teams advancing (validated like setup; 409 once the bracket exists) |
 | `POST .../generate-matches` | Build pool schedule (409 if matches exist) |
 | `PATCH .../matches/[matchId]` | Save score; triggers bracket advancement |

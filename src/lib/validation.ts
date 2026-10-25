@@ -59,6 +59,19 @@ export const updateAdvancingSchema = z.object({
   advancingTeams: z.number().int(),
 });
 
+export const updatePairingsSchema = z.object({
+  stage: z.enum(["ROUND_OF_16", "QUARTERFINAL", "SEMIFINAL"]),
+  matches: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        teamAId: z.string().min(1),
+        teamBId: z.string().min(1),
+      })
+    )
+    .min(1),
+});
+
 const playerNameField = z
   .string()
   .trim()

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { roundTabLabel, STAGE_ORDER } from "@/lib/stageLabels";
 import { knockoutByeCount } from "@/lib/knockout";
+import { EDITABLE_PAIRING_STAGES } from "@/lib/pairings";
+import { EditPairingsForm } from "./EditPairingsForm";
 import { MatchResultForm } from "./MatchResultForm";
 import type { AdminCourt, AdminGroup, AdminMatch } from "./types";
 
@@ -37,6 +39,7 @@ export function MatchesPanel({
   const [loading, setLoading] = useState(false);
   const [bracketError, setBracketError] = useState<string | null>(null);
   const [bracketLoading, setBracketLoading] = useState(false);
+  const [editingStage, setEditingStage] = useState<string | null>(null);
 
   const stageRounds = useMemo(() => {
     const map = new Map<string, { stage: string; round: number; matches: AdminMatch[] }>();
@@ -162,11 +165,42 @@ export function MatchesPanel({
         </p>
       )}
       <div className="flex flex-col gap-6">
-        {stageRounds.map(({ stage, round, matches: roundMatches }) => (
+        {stageRounds.map(({ stage, round, matches: roundMatches }) => {
+          // Pairings of a knockout round can be changed until it has started.
+          const canEditPairings =
+            EDITABLE_PAIRING_STAGES.includes(stage) &&
+            roundMatches.every(
+              (m) => m.status !== "COMPLETED" && m.teamAScores.length === 0
+            );
+          return (
           <div key={`${stage}-${round}`}>
-            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-navy-500">
-              {roundTabLabel(stage, round)}
-            </h3>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-navy-500">
+                {roundTabLabel(stage, round)}
+              </h3>
+              {canEditPairings && editingStage !== stage && (
+                <button
+                  type="button"
+                  onClick={() => setEditingStage(stage)}
+                  className="text-sm font-medium text-navy-600 underline hover:text-navy-900"
+                >
+                  Edit pairings
+                </button>
+              )}
+            </div>
+            {canEditPairings && editingStage === stage ? (
+              <EditPairingsForm
+                tournamentId={tournamentId}
+                stage={stage}
+                matches={roundMatches}
+                groups={groups}
+                onCancel={() => setEditingStage(null)}
+                onSaved={() => {
+                  setEditingStage(null);
+                  onChange();
+                }}
+              />
+            ) : (
             <div className="flex flex-col gap-3">
               {roundMatches.map((m) => (
                 <div
@@ -194,8 +228,10 @@ export function MatchesPanel({
                 </div>
               ))}
             </div>
+            )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {canGenerateBracket && (
