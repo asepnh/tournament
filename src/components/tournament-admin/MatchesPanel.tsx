@@ -7,6 +7,7 @@ import { roundTabLabel, STAGE_ORDER } from "@/lib/stageLabels";
 import { knockoutByeCount } from "@/lib/knockout";
 import { EDITABLE_PAIRING_STAGES } from "@/lib/pairings";
 import { EditPairingsForm } from "./EditPairingsForm";
+import { MatchCourtEditor } from "./MatchCourtEditor";
 import { MatchResultForm } from "./MatchResultForm";
 import type { AdminCourt, AdminGroup, AdminMatch } from "./types";
 
@@ -209,7 +210,13 @@ export function MatchesPanel({
                 >
                   <div className="mb-2 flex items-center justify-between text-xs text-navy-500">
                     <span>
-                      {m.court.name}
+                      <MatchCourtEditor
+                        tournamentId={tournamentId}
+                        match={m}
+                        courts={courts}
+                        roundMatches={roundMatches}
+                        onSaved={onChange}
+                      />
                       {m.groupId && (
                         <>
                           {" "}

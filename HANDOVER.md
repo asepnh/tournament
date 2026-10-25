@@ -227,6 +227,7 @@ All admin routes require a session and check `getOwnedTournament`.
 | `/api/auth/[...nextauth]` | Auth.js handlers |
 | `GET/POST /api/tournaments` | List / create |
 | `GET/DELETE /api/tournaments/[id]` | Full admin detail / delete |
+| `PATCH .../matches/[matchId]/court` | Move one match to another court of the right kind (`courtsForStage`: POOL courts for pool matches, elimination courts for knockout); works on played matches too |
 | `PATCH .../courts/[courtId]` | Rename a court (any time, no lock: it only changes the label) |
 | `POST .../courts` (`phase`: `POOL`/`ELIMINATION`), `DELETE .../courts/[courtId]` | Courts. Add is 409 for POOL once pool matches exist, for ELIMINATION once the bracket exists; delete blocked once matches use the court |
 | `POST .../setup-groups` | Create groups/teams from player count (409 if already done) |

@@ -70,7 +70,11 @@ architecture, decisions, operations runbook and known gotchas.
   courts. Group stage courts lock once the schedule is generated; elimination
   courts stay editable until the bracket is generated. Court names can be edited
   (**Edit** next to each court) at any time, even after matches are generated or
-  played; matches and the public page pick up the new name.
+  played; matches and the public page pick up the new name. Each match also has an
+  **Edit** link next to its court to move that single match to another court (group
+  stage courts for pool matches, elimination courts for knockout matches), even
+  after it has been played; a note appears if another match in the same round is
+  already on that court.
 - The admin enters a single game score per match (e.g. 11-7); winners and
   group standings (points, wins/losses, point differential) are computed
   automatically. Best-of-N / multi-set scoring is planned for Phase 4, when
