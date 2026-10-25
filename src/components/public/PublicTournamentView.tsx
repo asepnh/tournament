@@ -88,6 +88,12 @@ export function PublicTournamentView({
         />
       )}
 
+      {current.byes.length > 0 && (
+        <p className="mt-4 text-sm text-navy-600">
+          Bye to the next round: {current.byes.join(", ")}
+        </p>
+      )}
+
       <div className="mt-4">
         {knockoutOnly || tab === "results" ? (
           <MatchResultsView rounds={current.rounds} />

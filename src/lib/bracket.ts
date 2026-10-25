@@ -125,24 +125,50 @@ export function seedFirstRound(
   return pairs;
 }
 
+export function nextPowerOfTwo(n: number): number {
+  let size = 1;
+  while (size < n) size *= 2;
+  return size;
+}
+
+export type KnockoutFirstRound = {
+  /** Bracket size: the next power of 2 at or above the team count. */
+  size: number;
+  /** Real first-round matches; `position` is the slot in the full bracket. */
+  matches: { position: number; pair: [string, string] }[];
+  /** Teams skipping round 1 (the top seeds), with their slot in the bracket. */
+  byes: { position: number; teamId: string }[];
+};
+
 /**
- * First-round pairings for a knockout-only tournament: teams in seed order
- * (best first) go straight into the standard seeded bracket, so seed 1 plays
- * the last seed, 2 plays the second to last, and so on, and the top seeds
- * stay apart as long as possible. The team count must be a power of 2.
+ * First round of a knockout-only tournament. Teams are in seed order (best
+ * first) and go into the standard seeded bracket for the next power of 2
+ * (seed 1 plays the last seed, 2 the second to last, ...). When the team
+ * count isn't a power of 2, the seeds that would play a nonexistent team get
+ * a bye: the top `size - n` seeds skip round 1 and wait in the next round.
  */
-export function seedKnockoutBracket(teamIdsInSeedOrder: string[]): [string, string][] {
+export function buildKnockoutFirstRound(
+  teamIdsInSeedOrder: string[]
+): KnockoutFirstRound {
   const n = teamIdsInSeedOrder.length;
-  if (n < 2 || !isPowerOfTwo(n)) {
-    throw new Error(`Knockout bracket needs a power-of-2 number of teams, got ${n}`);
+  if (n < 2) {
+    throw new Error(`Knockout bracket needs at least 2 teams, got ${n}`);
   }
-  const order = seedOrder(n);
-  const pairs: [string, string][] = [];
-  for (let i = 0; i < order.length; i += 2) {
-    pairs.push([
-      teamIdsInSeedOrder[order[i] - 1],
-      teamIdsInSeedOrder[order[i + 1] - 1],
-    ]);
+  const size = nextPowerOfTwo(n);
+  const order = seedOrder(size);
+  const matches: KnockoutFirstRound["matches"] = [];
+  const byes: KnockoutFirstRound["byes"] = [];
+
+  for (let position = 0; position < size / 2; position++) {
+    const seedA = order[position * 2];
+    const seedB = order[position * 2 + 1];
+    const a = seedA <= n ? teamIdsInSeedOrder[seedA - 1] : null;
+    const b = seedB <= n ? teamIdsInSeedOrder[seedB - 1] : null;
+    if (a && b) {
+      matches.push({ position, pair: [a, b] });
+    } else if (a || b) {
+      byes.push({ position, teamId: (a ?? b) as string });
+    }
   }
-  return pairs;
+  return { size, matches, byes };
 }

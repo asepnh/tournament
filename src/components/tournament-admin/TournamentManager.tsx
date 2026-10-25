@@ -12,6 +12,7 @@ import { PlayerNamesPanel } from "./PlayerNamesPanel";
 import { MatchesPanel } from "./MatchesPanel";
 import { StandingsPanel } from "./StandingsPanel";
 import { formatTeamName } from "@/lib/teamDisplay";
+import { buildKnockoutFirstRound } from "@/lib/bracket";
 import type { AdminMatch, TournamentDetail } from "./types";
 
 function winnerDisplay(match: AdminMatch): string {
@@ -57,6 +58,14 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
       : []
     : data.groups;
   const matchesGenerated = data.matches.length > 0;
+  // Teams skipping round 1 of a knockout-only bracket (team count not a power of 2).
+  const byeTeams =
+    knockoutOnly && matchesGenerated && data.teams.length >= 2
+      ? buildKnockoutFirstRound(data.teams.map((t) => t.id)).byes.map((b) => {
+          const t = data.teams.find((x) => x.id === b.teamId)!;
+          return formatTeamName(t.label, t.player1Name, t.player2Name);
+        })
+      : [];
   const bracketGenerated = data.matches.some((m) => m.stage !== "POOL");
   const finalMatch = data.matches.find(
     (m) => m.stage === "FINAL" && m.status === "COMPLETED"
@@ -143,6 +152,7 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
         advancingTeams={data.tournament.advancingTeams}
         knockoutOnly={knockoutOnly}
         teamCount={data.teams.length}
+        byeTeams={byeTeams}
         onChange={refresh}
       />
 

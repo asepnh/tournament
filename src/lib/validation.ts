@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { isValidKnockoutTeamCount, KNOCKOUT_TEAM_COUNTS } from "@/lib/knockout";
+import {
+  isValidKnockoutTeamCount,
+  MAX_KNOCKOUT_TEAMS,
+  MIN_KNOCKOUT_TEAMS,
+} from "@/lib/knockout";
 
 export const registerSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -19,7 +23,7 @@ export const setupBracketSchema = z.object({
     .number()
     .int()
     .refine(isValidKnockoutTeamCount, {
-      message: `Number of teams must be one of: ${KNOCKOUT_TEAM_COUNTS.join(", ")}`,
+      message: `Number of teams must be between ${MIN_KNOCKOUT_TEAMS} and ${MAX_KNOCKOUT_TEAMS}`,
     }),
 });
 

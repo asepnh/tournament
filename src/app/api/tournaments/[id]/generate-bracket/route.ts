@@ -6,7 +6,7 @@ import { computeGroupStandings } from "@/lib/standings";
 import {
   isPowerOfTwo,
   seedFirstRound,
-  seedKnockoutBracket,
+  buildKnockoutFirstRound,
   stageForTeamCount,
 } from "@/lib/bracket";
 import { sortTeamsBySeed } from "@/lib/knockout";
@@ -64,14 +64,17 @@ export async function POST(
     }
 
     const seeded = sortTeamsBySeed(teams);
-    const knockoutPairs = seedKnockoutBracket(seeded.map((t) => t.id));
+    // With a team count that isn't a power of 2, the top seeds get byes: only
+    // the real matches are created, each remembering its slot in the bracket.
+    const firstRound = buildKnockoutFirstRound(seeded.map((t) => t.id));
     await prisma.$transaction(async (tx) => {
       await createStageMatches(
         tx,
         id,
-        stageForTeamCount(seeded.length),
-        knockoutPairs,
-        knockoutCourtIds
+        stageForTeamCount(firstRound.size),
+        firstRound.matches.map((m) => m.pair),
+        knockoutCourtIds,
+        firstRound.matches.map((m) => m.position)
       );
       await tx.tournament.update({
         where: { id },

@@ -4,7 +4,16 @@ import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Label, Select } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { KNOCKOUT_TEAM_COUNTS } from "@/lib/knockout";
+import {
+  knockoutByeCount,
+  MAX_KNOCKOUT_TEAMS,
+  MIN_KNOCKOUT_TEAMS,
+} from "@/lib/knockout";
+
+const TEAM_COUNT_OPTIONS = Array.from(
+  { length: MAX_KNOCKOUT_TEAMS - MIN_KNOCKOUT_TEAMS + 1 },
+  (_, i) => MIN_KNOCKOUT_TEAMS + i
+);
 
 export function BracketSetupPanel({
   tournamentId,
@@ -53,9 +62,10 @@ export function BracketSetupPanel({
       </h2>
       <p className="mb-4 text-sm text-navy-600">
         Doubles knockout, straight into the bracket with no group stage. Pick
-        the number of teams (2 players each); the bracket has no byes, so it
-        is 2, 4, 8 or 16 teams. Teams are labeled T1, T2, and so on, where the
-        number is the bracket seed.
+        the number of teams (2 players each), from {MIN_KNOCKOUT_TEAMS} to{" "}
+        {MAX_KNOCKOUT_TEAMS}. If it isn&apos;t a power of 2 (4, 8 or 16), the top
+        seeds get a bye and skip the first round. Teams are labeled T1, T2, and
+        so on, where the number is the bracket seed.
       </p>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <div>
@@ -66,11 +76,15 @@ export function BracketSetupPanel({
             onChange={(e) => setTeamCount(Number(e.target.value))}
             className="w-56"
           >
-            {KNOCKOUT_TEAM_COUNTS.map((n) => (
-              <option key={n} value={n}>
-                {n} teams ({n * 2} players)
-              </option>
-            ))}
+            {TEAM_COUNT_OPTIONS.map((n) => {
+              const byes = knockoutByeCount(n);
+              return (
+                <option key={n} value={n}>
+                  {n} teams ({n * 2} players
+                  {byes > 0 ? `, ${byes} bye${byes === 1 ? "" : "s"}` : ""})
+                </option>
+              );
+            })}
           </Select>
         </div>
         <Button type="submit" disabled={loading}>

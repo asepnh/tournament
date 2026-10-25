@@ -72,11 +72,19 @@ steps 3, 5 and 6 are replaced by `setup-bracket` (2/4/8/16 teams, labeled `T1..T
 = bracket seed, `Team.groupId = null`); the roster/seeding panel assigns seeds to
 `T1..` in order (it reuses `randomizePairing` with a single "group" of all teams,
 which places seed k on team k); **Generate elimination bracket** then seeds the
-teams with `seedKnockoutBracket` (`bracket.ts`) and everything after is shared.
+teams with `buildKnockoutFirstRound` (`bracket.ts`) and everything after is shared.
+**Byes:** 2-16 teams are allowed; for a non-power-of-2 count the bracket size is the
+next power of 2 and the top `size - n` seeds get byes. Only the real first-round
+matches are created, each with `bracketPosition` = its slot in the *full* bracket
+(0..size/2-1), so empty slots are the byes (recomputed from the seed order, nothing
+extra is stored). `entrantsForNextStage` (`bracket-progress.ts`) fills round 2 slot
+by slot: the winner of the match in that slot, else the bye team. With 3 teams
+there is one semifinal match, hence no 3rd Place match (the existing
+"two semifinal losers" guard handles that).
 All of this is gated on `format`, so pool tournaments take the old paths unchanged;
 `setup-groups`, `generate-matches` and `advancing` reject knockout-only tournaments.
-Courts of a knockout-only tournament are forced to `ELIMINATION`. No byes, max 16
-teams (Round of 16).
+Courts of a knockout-only tournament are forced to `ELIMINATION`. Max 16 teams
+(Round of 16).
 
 **Vocabulary that matters:**
 

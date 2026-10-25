@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { computeGroupStandings } from "@/lib/standings";
 import { STAGE_ORDER } from "@/lib/stageLabels";
 import { formatTeamName } from "@/lib/teamDisplay";
+import { buildKnockoutFirstRound } from "@/lib/bracket";
+import { sortTeamsBySeed } from "@/lib/knockout";
 
 export type PublicMatch = {
   id: string;
@@ -50,6 +52,8 @@ export type PublicTournamentData = {
   groups: PublicGroupStanding[];
   /** How many teams from each group go through to the elimination round. */
   advancingPerGroup: number;
+  /** Knockout-only: teams that skipped round 1 (display names). */
+  byes: string[];
 };
 
 export async function getPublicTournamentData(
@@ -150,6 +154,24 @@ export async function getPublicTournamentData(
     };
   });
 
+  // Knockout-only brackets with a team count that isn't a power of 2 give the
+  // top seeds a bye; name them so spectators know where those teams are.
+  let byes: string[] = [];
+  if (tournament.format === "KNOCKOUT_ONLY" && matches.length > 0) {
+    const teams = sortTeamsBySeed(
+      await prisma.team.findMany({
+        where: { tournamentId: tournament.id, groupId: null },
+      })
+    );
+    if (teams.length >= 2) {
+      const byTeam = new Map(teams.map((t) => [t.id, t]));
+      byes = buildKnockoutFirstRound(teams.map((t) => t.id)).byes.map((b) => {
+        const t = byTeam.get(b.teamId)!;
+        return formatTeamName(t.label, t.player1Name, t.player2Name);
+      });
+    }
+  }
+
   return {
     tournament: {
       name: tournament.name,
@@ -165,5 +187,6 @@ export async function getPublicTournamentData(
       groups.length > 0
         ? (tournament.advancingTeams ?? groups.length * 2) / groups.length
         : 0,
+    byes,
   };
 }

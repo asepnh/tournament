@@ -1,6 +1,12 @@
 import type { Prisma, MatchStage } from "@prisma/client";
-import { nextStage, type KnockoutStage } from "./bracket";
+import {
+  buildKnockoutFirstRound,
+  nextStage,
+  stageForTeamCount,
+  type KnockoutStage,
+} from "./bracket";
 import { eliminationCourtIds } from "./courts";
+import { sortTeamsBySeed } from "./knockout";
 
 type Tx = Prisma.TransactionClient;
 
@@ -9,7 +15,9 @@ export async function createStageMatches(
   tournamentId: string,
   stage: KnockoutStage,
   pairs: [string, string][],
-  courtIds: string[]
+  courtIds: string[],
+  /** Slot of each pair in the full bracket; defaults to 0, 1, 2, ... */
+  positions?: number[]
 ) {
   if (courtIds.length === 0) {
     throw new Error("No courts available");
@@ -19,12 +27,48 @@ export async function createStageMatches(
       tournamentId,
       stage,
       round: 1,
-      bracketPosition: i,
+      bracketPosition: positions?.[i] ?? i,
       courtId: courtIds[i % courtIds.length],
       teamAId,
       teamBId,
     })),
   });
+}
+
+/**
+ * The teams entering the next stage, in bracket order. Normally that is the
+ * winners of the stage just finished. In the first round of a knockout-only
+ * bracket with byes, the first-round matches only fill some slots; the empty
+ * slots belong to the bye teams, which join the winners here.
+ */
+async function entrantsForNextStage(
+  tx: Tx,
+  tournamentId: string,
+  stage: MatchStage,
+  ordered: { bracketPosition: number | null; winnerId: string | null }[]
+): Promise<string[]> {
+  const winners = ordered.map((m) => m.winnerId as string);
+
+  const tournament = await tx.tournament.findUnique({
+    where: { id: tournamentId },
+    select: { format: true },
+  });
+  if (tournament?.format !== "KNOCKOUT_ONLY") return winners;
+
+  const teams = sortTeamsBySeed(
+    await tx.team.findMany({ where: { tournamentId } })
+  );
+  const first = buildKnockoutFirstRound(teams.map((t) => t.id));
+  if (first.byes.length === 0 || stage !== stageForTeamCount(first.size)) {
+    return winners;
+  }
+
+  const winnerAt = new Map(ordered.map((m) => [m.bracketPosition ?? 0, m.winnerId as string]));
+  const byeAt = new Map(first.byes.map((b) => [b.position, b.teamId]));
+  return Array.from(
+    { length: first.size / 2 },
+    (_, position) => (winnerAt.get(position) ?? byeAt.get(position)) as string
+  );
 }
 
 /**
@@ -77,7 +121,7 @@ export async function advanceBracketIfStageComplete(
   const ordered = [...stageMatches].sort(
     (a, b) => (a.bracketPosition ?? 0) - (b.bracketPosition ?? 0)
   );
-  const winners = ordered.map((m) => m.winnerId as string);
+  const winners = await entrantsForNextStage(tx, tournamentId, stage, ordered);
   const losers = ordered.map((m) =>
     m.winnerId === m.teamAId ? m.teamBId : m.teamAId
   );

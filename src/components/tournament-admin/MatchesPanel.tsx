@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { roundTabLabel, STAGE_ORDER } from "@/lib/stageLabels";
+import { knockoutByeCount } from "@/lib/knockout";
 import { MatchResultForm } from "./MatchResultForm";
 import type { AdminCourt, AdminGroup, AdminMatch } from "./types";
 
@@ -15,6 +16,7 @@ export function MatchesPanel({
   advancingTeams,
   knockoutOnly = false,
   teamCount = 0,
+  byeTeams = [],
   onChange,
 }: {
   tournamentId: string;
@@ -27,6 +29,8 @@ export function MatchesPanel({
   knockoutOnly?: boolean;
   /** Teams in a knockout-only bracket. */
   teamCount?: number;
+  /** Knockout-only: names of the teams that skipped round 1. */
+  byeTeams?: string[];
   onChange: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +114,11 @@ export function MatchesPanel({
         <h2 className="mb-2 text-lg font-semibold text-navy-900">Matches</h2>
         <p className="mb-4 text-sm text-navy-600">
           {canGenerateKnockout
-            ? `Generate the ${teamCount}-team bracket. Seed 1 plays the lowest seed, 2 plays the second lowest, and so on.`
+            ? `Generate the ${teamCount}-team bracket. Seed 1 plays the lowest seed, 2 plays the second lowest, and so on.${
+                knockoutByeCount(teamCount) > 0
+                  ? ` The top ${knockoutByeCount(teamCount)} seed${knockoutByeCount(teamCount) === 1 ? "" : "s"} get a bye.`
+                  : ""
+              }`
             : "Add courts and set up the bracket first, then generate it."}
         </p>
         <Button
@@ -148,6 +156,11 @@ export function MatchesPanel({
   return (
     <Card>
       <h2 className="mb-4 text-lg font-semibold text-navy-900">Matches</h2>
+      {byeTeams.length > 0 && (
+        <p className="mb-4 text-sm text-navy-600">
+          Bye to the next round: {byeTeams.join(", ")}
+        </p>
+      )}
       <div className="flex flex-col gap-6">
         {stageRounds.map(({ stage, round, matches: roundMatches }) => (
           <div key={`${stage}-${round}`}>

@@ -139,8 +139,12 @@ When creating a tournament the admin picks a format: **Groups, then knockout**
 pool play entirely.
 
 - The admin adds courts (one list, used for the knockout rounds), then chooses
-  the number of teams: 2, 4, 8 or 16 (the bracket has no byes). Teams are
-  labeled T1..Tn, where the number is the bracket seed.
+  the number of teams, from 2 to 16. If it isn't a power of 2 (4, 8 or 16),
+  the top seeds get a **bye** and skip the first round: the bracket rounds up
+  to the next power of 2 and the top (size - teams) seeds wait in round 2 (6
+  teams: seeds 1 and 2 have byes, round 1 is T3 v T6 and T4 v T5). The admin and
+  public pages name the teams with a bye. Teams are labeled T1..Tn, where the
+  number is the bracket seed.
 - The roster / **Allocate Players** panel works as usual. Seeds take the top
   spots (seed 1 = T1, seed 2 = T2, ...), seeds never partner each other, and
   each seed's partner comes from the top of the roster; everyone else is
