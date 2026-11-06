@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       description: parsed.data.description || null,
       slug,
       format: parsed.data.format,
+      teamSize: parsed.data.teamSize,
       ownerId: session.user.id,
     },
   });

@@ -11,6 +11,7 @@ export function CreateTournamentForm() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [format, setFormat] = useState<"POOL_PLAY" | "KNOCKOUT_ONLY">("POOL_PLAY");
+  const [teamSize, setTeamSize] = useState<1 | 2>(2);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +24,7 @@ export function CreateTournamentForm() {
       const res = await fetch("/api/tournaments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, format }),
+        body: JSON.stringify({ name, description, format, teamSize }),
       });
       const data = await res.json();
 
@@ -68,6 +69,17 @@ export function CreateTournamentForm() {
           >
             <option value="POOL_PLAY">Groups, then knockout</option>
             <option value="KNOCKOUT_ONLY">Knockout only (no group stage)</option>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="teamSize">Team size</Label>
+          <Select
+            id="teamSize"
+            value={teamSize}
+            onChange={(e) => setTeamSize(Number(e.target.value) === 1 ? 1 : 2)}
+          >
+            <option value={2}>Doubles (2 players per team)</option>
+            <option value={1}>Singles (1 player per team)</option>
           </Select>
         </div>
         <div>

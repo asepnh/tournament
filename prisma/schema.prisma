@@ -60,6 +60,9 @@ model Tournament {
   description    String?
   status         TournamentStatus @default(SETUP)
   format         TournamentFormat @default(POOL_PLAY)
+  // Players per team: 1 (singles) or 2 (doubles). Set at creation and fixed
+  // afterwards — changing it would orphan any player2Name already saved.
+  teamSize       Int              @default(2)
   playerCount    Int?
   // Teams that advance to the elimination bracket (a power of 2, set when
   // groups are created). Null on older tournaments = top 2 per group.

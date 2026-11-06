@@ -19,11 +19,14 @@ import type { AdminTeam } from "./types";
  */
 export function BracketSetupPanel({
   tournamentId,
+  teamSize,
   teams,
   locked,
   onChange,
 }: {
   tournamentId: string;
+  /** Players per team for this tournament (fixed at creation). */
+  teamSize: number;
   /** Current teams, in seed order (empty before the bracket is created). */
   teams: AdminTeam[];
   /** The matches have been generated, so the number of teams is fixed. */
@@ -86,8 +89,8 @@ export function BracketSetupPanel({
       <Card>
         <h2 className="mb-2 text-lg font-semibold text-navy-900">Bracket</h2>
         <p className="text-sm text-navy-600">
-          {current} teams ({current * 2} players). The number of teams is fixed
-          because the bracket has been generated.
+          {current} teams ({current * teamSize} players). The number of teams
+          is fixed because the bracket has been generated.
         </p>
       </Card>
     );
@@ -99,8 +102,9 @@ export function BracketSetupPanel({
         {current === 0 ? "Create bracket" : "Bracket"}
       </h2>
       <p className="mb-4 text-sm text-navy-600">
-        Doubles knockout, straight into the bracket with no group stage. Enter
-        the number of teams (2 players each), from {MIN_KNOCKOUT_TEAMS} to{" "}
+        {teamSize === 1 ? "Singles" : "Doubles"} knockout, straight into the
+        bracket with no group stage. Enter the number of teams ({teamSize}{" "}
+        player{teamSize === 1 ? "" : "s"} each), from {MIN_KNOCKOUT_TEAMS} to{" "}
         {MAX_KNOCKOUT_TEAMS}. If it isn&apos;t a power of 2 (4, 8 or 16), the
         top seeds get a bye and skip the first round. Teams are labeled T1, T2,
         and so on, where the number is the bracket seed.
@@ -141,7 +145,7 @@ export function BracketSetupPanel({
       )}
       {valid && (
         <p className="mt-3 text-sm text-navy-600">
-          {count} teams = {count * 2} players
+          {count} teams = {count * teamSize} players
           {byes > 0 ? `, ${byes} bye${byes === 1 ? "" : "s"}` : ""}
         </p>
       )}

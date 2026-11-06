@@ -118,6 +118,7 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
           // Remount when the team list changes so the field shows the new count.
           key={data.teams.length}
           tournamentId={data.tournament.id}
+          teamSize={data.tournament.teamSize}
           teams={data.teams}
           locked={bracketGenerated}
           onChange={refresh}
@@ -126,6 +127,7 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
         <>
           <PlayerSetupPanel
             tournamentId={data.tournament.id}
+            teamSize={data.tournament.teamSize}
             groups={data.groups}
             onChange={refresh}
           />
@@ -143,6 +145,7 @@ export function TournamentManager({ initial }: { initial: TournamentDetail }) {
       <PlayerNamesPanel
         key={knockoutOnly ? `names-${data.teams.length}` : "names"}
         tournamentId={data.tournament.id}
+        teamSize={data.tournament.teamSize}
         groups={nameGroups}
         knockoutOnly={knockoutOnly}
         onChange={refresh}

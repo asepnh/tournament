@@ -4,6 +4,8 @@ export type AdminTournament = {
   name: string;
   description: string | null;
   status: "SETUP" | "IN_PROGRESS" | "COMPLETED";
+  /** Players per team: 1 (singles) or 2 (doubles). */
+  teamSize: number;
   playerCount: number | null;
   advancingTeams: number | null;
   format: "POOL_PLAY" | "KNOCKOUT_ONLY";

@@ -12,7 +12,8 @@ export type GroupSlots = { teamIds: string[] };
 export type TeamAssignment = {
   teamId: string;
   player1Name: string;
-  player2Name: string;
+  // Absent for singles (teamSize 1) — a team is a single player.
+  player2Name?: string;
 };
 
 /**
@@ -82,15 +83,18 @@ function placeSeedsByCycling(seeds: string[], groups: GroupSlots[]): SeedPlaceme
  * - Every seed gets a team of their own — seeds never partner each other.
  *   With exactly 4 groups they follow the snake table above; with any other
  *   group count they are spread by cycling through the groups.
- * - Each seed's partner is drawn at random from the next S unseeded names in
- *   roster order (S = number of seeds), so a seed is never paired with
- *   someone listed far down the roster.
- * - Everyone else is shuffled into the remaining slots.
+ * - Doubles (teamSize 2): each seed's partner is drawn at random from the
+ *   next S unseeded names in roster order (S = number of seeds), so a seed
+ *   is never paired with someone listed far down the roster. Everyone else
+ *   is shuffled into the remaining slots two at a time.
+ * - Singles (teamSize 1): there are no partners — a seed's "team" is just
+ *   themselves, and everyone else is shuffled one per remaining slot.
  */
 export function randomizePairing(
   rosterNames: string[],
   seedNames: string[],
-  groups: GroupSlots[]
+  groups: GroupSlots[],
+  teamSize: 1 | 2 = 2
 ): TeamAssignment[] {
   const totalTeams = groups.reduce((sum, g) => sum + g.teamIds.length, 0);
 
@@ -116,9 +120,29 @@ export function randomizePairing(
       ? placeSeedsByTable(seedNames, groups)
       : placeSeedsByCycling(seedNames, groups);
 
+  const assignments: TeamAssignment[] = [];
+
+  if (teamSize === 1) {
+    for (const [teamId, seed] of placed) {
+      assignments.push({ teamId, player1Name: seed });
+    }
+
+    const rest = shuffle(unseeded);
+    const emptySlots = shuffle(
+      groups.flatMap((g) => g.teamIds).filter((id) => !placed.has(id))
+    );
+    if (rest.length !== emptySlots.length) {
+      throw new Error("Roster size doesn't match the number of team slots");
+    }
+    emptySlots.forEach((teamId, i) => {
+      assignments.push({ teamId, player1Name: rest[i] });
+    });
+
+    return assignments;
+  }
+
   // Partners: the first S unseeded names in roster order, dealt out randomly.
   const partners = shuffle(unseeded.slice(0, seedNames.length));
-  const assignments: TeamAssignment[] = [];
   let partnerIndex = 0;
   for (const [teamId, seed] of placed) {
     assignments.push({
