@@ -16,6 +16,9 @@ export const createTournamentSchema = z.object({
   description: z.string().trim().max(2000).optional().or(z.literal("")),
   // "Groups, then knockout" (default) or straight into a knockout bracket.
   format: z.enum(["POOL_PLAY", "KNOCKOUT_ONLY"]).default("POOL_PLAY"),
+  // Players per team: 1 (singles) or 2 (doubles). Fixed once set — see the
+  // note on Tournament.teamSize in schema.prisma.
+  teamSize: z.union([z.literal(1), z.literal(2)]).default(2),
 });
 
 export const setupBracketSchema = z.object({
@@ -43,20 +46,26 @@ export const addCourtSchema = z.object({
 
 // Groups end up with 3-6 teams each, and the group count is always chosen to
 // be a power of 2 (the elimination bracket relies on that to avoid byes) —
-// see src/lib/groupPlanning.ts. That scheme covers every even player count
-// from MIN to MAX with no gaps; 96 is a real ceiling, not arbitrary: it's the
-// most players 8 groups (the max the bracket's Round-of-16-down-to-Final
-// chain supports) can hold at 6 teams/group.
-export const MIN_PLAYER_COUNT = 8;
-export const MAX_PLAYER_COUNT = 96;
+// see src/lib/groupPlanning.ts. That scheme covers every team count from MIN
+// to MAX with no gaps; 48 is a real ceiling, not arbitrary: it's the most
+// teams 8 groups (the max the bracket's Round-of-16-down-to-Final chain
+// supports) can hold at 6 teams/group. These bounds are in teams, not
+// players, so they apply the same way whether teamSize is 1 or 2.
+export const MIN_TEAM_COUNT = 4;
+export const MAX_TEAM_COUNT = 48;
+
+export function minPlayerCount(teamSize: number): number {
+  return MIN_TEAM_COUNT * teamSize;
+}
+
+export function maxPlayerCount(teamSize: number): number {
+  return MAX_TEAM_COUNT * teamSize;
+}
 
 export const setupGroupsSchema = z.object({
-  playerCount: z
-    .number()
-    .int()
-    .min(MIN_PLAYER_COUNT, `Must be at least ${MIN_PLAYER_COUNT} players`)
-    .max(MAX_PLAYER_COUNT, `Must be at most ${MAX_PLAYER_COUNT} players`)
-    .refine((n) => n % 2 === 0, { message: "Player count must be even" }),
+  // Checked against the tournament's teamSize in the route, since the right
+  // bounds and divisibility depend on it.
+  playerCount: z.number().int().min(1).max(MAX_TEAM_COUNT * 2),
   // Teams that advance to the elimination bracket. Which values are valid
   // depends on the group split, so the route checks it (see advancing.ts);
   // omitted = top 2 per group.

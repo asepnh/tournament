@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getOwnedTournament } from "@/lib/authz";
-import { setupGroupsSchema } from "@/lib/validation";
+import { setupGroupsSchema, minPlayerCount, maxPlayerCount } from "@/lib/validation";
 import { indexToLetters } from "@/lib/labels";
 import { planGroupSizes } from "@/lib/groupPlanning";
 import { advancingOptions, defaultAdvancing } from "@/lib/advancing";
@@ -51,8 +51,29 @@ export async function POST(
     );
   }
 
+  const { teamSize } = tournament;
   const { playerCount } = parsed.data;
-  const teamCount = playerCount / 2;
+  const min = minPlayerCount(teamSize);
+  const max = maxPlayerCount(teamSize);
+  if (playerCount % teamSize !== 0) {
+    return NextResponse.json(
+      {
+        error:
+          teamSize === 1
+            ? "Player count is invalid"
+            : "Player count must be even",
+      },
+      { status: 400 }
+    );
+  }
+  if (playerCount < min || playerCount > max) {
+    return NextResponse.json(
+      { error: `Must be between ${min} and ${max} players` },
+      { status: 400 }
+    );
+  }
+
+  const teamCount = playerCount / teamSize;
   const groupSizes = planGroupSizes(teamCount);
   const advancingTeams =
     parsed.data.advancingTeams ?? defaultAdvancing(groupSizes);

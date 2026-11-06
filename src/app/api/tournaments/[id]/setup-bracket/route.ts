@@ -58,7 +58,7 @@ export async function POST(
   await prisma.$transaction([
     prisma.tournament.update({
       where: { id },
-      data: { playerCount: teamCount * 2 },
+      data: { playerCount: teamCount * tournament.teamSize },
     }),
     // More teams: add T(existing+1)..Tn. Fewer: drop the highest seeds. No
     // matches exist yet, so nothing references the removed teams.

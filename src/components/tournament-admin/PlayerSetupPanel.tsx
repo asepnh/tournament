@@ -4,17 +4,20 @@ import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, Select } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { MIN_PLAYER_COUNT, MAX_PLAYER_COUNT } from "@/lib/validation";
+import { minPlayerCount, maxPlayerCount } from "@/lib/validation";
 import { planGroupSizes } from "@/lib/groupPlanning";
 import { advancingOptions, defaultAdvancing } from "@/lib/advancing";
 import type { AdminGroup } from "./types";
 
 export function PlayerSetupPanel({
   tournamentId,
+  teamSize,
   groups,
   onChange,
 }: {
   tournamentId: string;
+  /** Players per team for this tournament (fixed at creation). */
+  teamSize: number;
   groups: AdminGroup[];
   onChange: () => void;
 }) {
@@ -23,6 +26,9 @@ export function PlayerSetupPanel({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const MIN_PLAYER_COUNT = minPlayerCount(teamSize);
+  const MAX_PLAYER_COUNT = maxPlayerCount(teamSize);
+
   // The valid "teams advancing" choices depend on how the players split into
   // groups, so work them out live from the player count being typed.
   const count = Number(playerCount);
@@ -30,8 +36,8 @@ export function PlayerSetupPanel({
     Number.isInteger(count) &&
     count >= MIN_PLAYER_COUNT &&
     count <= MAX_PLAYER_COUNT &&
-    count % 2 === 0;
-  const groupSizes = validCount ? planGroupSizes(count / 2) : null;
+    count % teamSize === 0;
+  const groupSizes = validCount ? planGroupSizes(count / teamSize) : null;
   const advancingChoices = groupSizes ? advancingOptions(groupSizes) : [];
   const advancingTeams = groupSizes
     ? advancingChoices.includes(Number(advancing))
@@ -78,13 +84,13 @@ export function PlayerSetupPanel({
         Set up groups
       </h2>
       <p className="mb-4 text-sm text-navy-600">
-        Doubles pool play. Enter the total number of players — any even
-        number from {MIN_PLAYER_COUNT} to {MAX_PLAYER_COUNT} — and
-        groups/teams will be created automatically, labeled A1–A4, B1–B6,
-        and so on. Groups end up with 3–6 teams each (the exact split
-        depends on the count, kept to a power-of-2 number of groups so the
-        elimination bracket works cleanly later). Also choose how many teams
-        advance to the elimination round.
+        {teamSize === 1 ? "Singles" : "Doubles"} pool play. Enter the total
+        number of players — a multiple of {teamSize} from {MIN_PLAYER_COUNT}{" "}
+        to {MAX_PLAYER_COUNT} — and groups/teams will be created
+        automatically, labeled A1–A4, B1–B6, and so on. Groups end up with
+        3–6 teams each (the exact split depends on the count, kept to a
+        power-of-2 number of groups so the elimination bracket works cleanly
+        later). Also choose how many teams advance to the elimination round.
       </p>
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         <div>
@@ -94,7 +100,7 @@ export function PlayerSetupPanel({
             type="number"
             min={MIN_PLAYER_COUNT}
             max={MAX_PLAYER_COUNT}
-            step={2}
+            step={teamSize}
             required
             value={playerCount}
             onChange={(e) => setPlayerCount(e.target.value)}
@@ -127,7 +133,7 @@ export function PlayerSetupPanel({
       </form>
       {groupSizes && (
         <p className="mt-3 text-sm text-navy-600">
-          {count / 2} teams in {groupSizes.length} group
+          {count / teamSize} teams in {groupSizes.length} group
           {groupSizes.length === 1 ? "" : "s"}; the best {advancingTeams} go
           through to the elimination round.
         </p>

@@ -372,7 +372,8 @@ logic (`teamDisplay.ts`, names panel).
 
 | I want to... | Touch |
 | --- | --- |
-| Change allowed player range | `MIN/MAX_PLAYER_COUNT` in `validation.ts`; check `groupPlanning.ts` still tiles |
+| Change allowed team-count range | `MIN/MAX_TEAM_COUNT` in `validation.ts`; check `groupPlanning.ts` still tiles |
+| Add another team size (not just 1/2) | `Tournament.teamSize` + the `z.union` in `createTournamentSchema`, `randomizePairing.ts`'s singles/doubles branches, and every `player1Name`/`player2Name` UI (`PlayerNamesPanel.tsx`) |
 | Change group size limits | `groupPlanning.ts` (the 3 and 6) and the range check in `generate-matches/route.ts` |
 | Change ranking/tiebreaks | `standings.ts` (used by admin panel, public payload, and bracket generation) |
 | Add a knockout stage | `MatchStage` enum + migration, `bracket.ts` (`stageForTeamCount`/`nextStage`), `stageLabels.ts`, `types.ts` |

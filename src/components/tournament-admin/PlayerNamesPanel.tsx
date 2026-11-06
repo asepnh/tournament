@@ -42,11 +42,14 @@ function parseLines(text: string): string[] {
 
 export function PlayerNamesPanel({
   tournamentId,
+  teamSize,
   groups,
   knockoutOnly = false,
   onChange,
 }: {
   tournamentId: string;
+  /** Players per team for this tournament (fixed at creation). */
+  teamSize: number;
   /** For a knockout-only tournament, pass the teams as one pseudo-group. */
   groups: AdminGroup[];
   /** Teams are bracket seeds (T1 = seed 1) instead of members of groups. */
@@ -54,7 +57,7 @@ export function PlayerNamesPanel({
   onChange: () => void;
 }) {
   const orderedTeams = groups.flatMap((g) => g.teams);
-  const expectedCount = orderedTeams.length * 2;
+  const expectedCount = orderedTeams.length * teamSize;
 
   const [names, setNames] = useState<NameState>(() => buildInitialState(groups));
   const [roster, setRoster] = useState<string>(() => buildInitialRosterText(groups));
@@ -140,12 +143,17 @@ export function PlayerNamesPanel({
       const groupSlots = groups.map((g) => ({
         teamIds: g.teams.map((t) => t.id),
       }));
-      const assignments = randomizePairing(rosterLines, seedLines, groupSlots);
+      const assignments = randomizePairing(
+        rosterLines,
+        seedLines,
+        groupSlots,
+        teamSize === 1 ? 1 : 2
+      );
       await saveTeams(
         assignments.map((a) => ({
           id: a.teamId,
           player1Name: a.player1Name,
-          player2Name: a.player2Name,
+          player2Name: a.player2Name ?? "",
         }))
       );
 
@@ -153,7 +161,7 @@ export function PlayerNamesPanel({
       for (const a of assignments) {
         nextNames[a.teamId] = {
           player1Name: a.player1Name,
-          player2Name: a.player2Name,
+          player2Name: a.player2Name ?? "",
         };
       }
       setNames(nextNames);
@@ -181,11 +189,11 @@ export function PlayerNamesPanel({
           Allocate players
         </p>
         <p className="mb-2 text-sm text-navy-600">
-          Paste or type all {expectedCount} players, one name per line, then
-          pair them into teams and assign them {knockoutOnly ? "to the bracket" : "across the groups"}. List the
-          stronger players first: seeds are partnered with players from the
-          top of this list, and everyone else is random. Clicking again
-          re-shuffles.
+          Paste or type all {expectedCount} players, one name per line, then{" "}
+          {teamSize === 1 ? "assign them" : "pair them into teams and assign them"}{" "}
+          {knockoutOnly ? "to the bracket" : "across the groups"}. List the
+          stronger players first: seeds {teamSize === 1 ? "get the top slots" : "are partnered with players from the top of this list"},
+          and everyone else is random. Clicking again re-shuffles.
         </p>
         <Textarea
           rows={6}
@@ -209,9 +217,14 @@ export function PlayerNamesPanel({
               ? " Seeds take the top bracket spots: seed 1 is T1, seed 2 is T2, and so on, so the best seeds meet the lowest seeds in round 1."
               : groups.length === 4
                 ? " With 4 groups, seeds 1-4 go in the first team row, 5-8 in the second (in reverse group order), and so on, so the groups stay balanced."
-                : " Seeds are spread across the groups in turn."}{" "}
-            Each seed&apos;s partner is picked at random from the next{" "}
-            {seedCount || "N"} unseeded names at the top of the roster.
+                : " Seeds are spread across the groups in turn."}
+            {teamSize === 2 && (
+              <>
+                {" "}Each seed&apos;s partner is picked at random from the
+                next {seedCount || "N"} unseeded names at the top of the
+                roster.
+              </>
+            )}
           </p>
           <Textarea
             rows={8}
@@ -237,26 +250,34 @@ export function PlayerNamesPanel({
             <p className="mb-2 font-semibold text-navy-900">
               {knockoutOnly ? "Teams (in bracket seed order)" : `Group ${g.label}`}
             </p>
-            <div className="grid grid-cols-[3.5rem_1fr_1fr] items-center gap-x-3 gap-y-2">
+            <div
+              className={
+                teamSize === 1
+                  ? "grid grid-cols-[3.5rem_1fr] items-center gap-x-3 gap-y-2"
+                  : "grid grid-cols-[3.5rem_1fr_1fr] items-center gap-x-3 gap-y-2"
+              }
+            >
               {g.teams.map((t) => (
                 <Fragment key={t.id}>
                   <span className="text-sm font-semibold text-navy-700">
                     {t.label}
                   </span>
                   <Input
-                    placeholder="Player 1 name"
+                    placeholder={teamSize === 1 ? "Player name" : "Player 1 name"}
                     value={names[t.id]?.player1Name ?? ""}
                     onChange={(e) =>
                       updateName(t.id, "player1Name", e.target.value)
                     }
                   />
-                  <Input
-                    placeholder="Player 2 name"
-                    value={names[t.id]?.player2Name ?? ""}
-                    onChange={(e) =>
-                      updateName(t.id, "player2Name", e.target.value)
-                    }
-                  />
+                  {teamSize === 2 && (
+                    <Input
+                      placeholder="Player 2 name"
+                      value={names[t.id]?.player2Name ?? ""}
+                      onChange={(e) =>
+                        updateName(t.id, "player2Name", e.target.value)
+                      }
+                    />
+                  )}
                 </Fragment>
               ))}
             </div>
